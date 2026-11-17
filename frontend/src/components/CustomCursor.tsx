@@ -25,13 +25,12 @@ export const CustomCursor: React.FC = () => {
     };
   }, []);
 
-  // Smooth lerp for trailing cursor
   useEffect(() => {
     let animationFrameId: number;
     const updateTrailing = () => {
       setTrailing(prev => ({
-        x: prev.x + (position.x - prev.x) * 0.15,
-        y: prev.y + (position.y - prev.y) * 0.15,
+        x: prev.x + (position.x - prev.x) * 0.18,
+        y: prev.y + (position.y - prev.y) * 0.18,
       }));
       animationFrameId = requestAnimationFrame(updateTrailing);
     };
@@ -39,7 +38,6 @@ export const CustomCursor: React.FC = () => {
     return () => cancelAnimationFrame(animationFrameId);
   }, [position]);
 
-  // Track hover on clickable elements
   useEffect(() => {
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -64,31 +62,31 @@ export const CustomCursor: React.FC = () => {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[9999] overflow-hidden hidden md:block">
-      {/* 1. Main Dot */}
+      {/* Precision Core Dot */}
       <div
-        className="fixed -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)] transition-transform duration-75 ease-out"
+        className="fixed -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#B02310] transition-transform duration-75 ease-out shadow-sm"
         style={{
           left: `${position.x}px`,
           top: `${position.y}px`,
-          width: isClicked ? '8px' : isHovered ? '14px' : '10px',
-          height: isClicked ? '8px' : isHovered ? '14px' : '10px',
+          width: isClicked ? '6px' : isHovered ? '12px' : '8px',
+          height: isClicked ? '6px' : isHovered ? '12px' : '8px',
         }}
       />
 
-      {/* 2. Trailing Outer Ring */}
+      {/* Trailing Architectural Ring */}
       <div
-        className={`fixed -translate-x-1/2 -translate-y-1/2 rounded-full border-2 transition-all duration-300 ease-out ${
+        className={`fixed -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#111827]/40 transition-all duration-300 ease-out ${
           isHovered
-            ? 'scale-150 border-emerald-400 bg-emerald-400/10 shadow-[0_0_24px_rgba(16,185,129,0.4)]'
+            ? 'scale-150 border-[#B02310] bg-[#B02310]/10 shadow-[0_0_20px_rgba(176,35,16,0.3)]'
             : isClicked
-            ? 'scale-90 border-emerald-600'
-            : 'border-emerald-500/50'
+            ? 'scale-90 border-[#B02310]'
+            : 'scale-100'
         }`}
         style={{
           left: `${trailing.x}px`,
           top: `${trailing.y}px`,
-          width: '36px',
-          height: '36px',
+          width: '32px',
+          height: '32px',
         }}
       />
     </div>

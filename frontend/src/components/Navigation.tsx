@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   FlaskConical,
@@ -9,92 +9,99 @@ import {
   Bot,
   Cpu,
   MapPin,
-  Wifi,
-  WifiOff
+  ArrowUpRight
 } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import { Language, UserRole } from '../types';
 
 export const Navigation: React.FC = () => {
-  const { language, setLanguage, role, setRole, selectedPlot, plots, setSelectedPlotId, isOffline } = useApp();
+  const { language, setLanguage, role, setRole, selectedPlot, plots, setSelectedPlotId } = useApp();
+  const navigate = useNavigate();
 
   const navItems = [
-    { to: '/', label: language === 'mr' ? 'डॅशबोर्ड' : language === 'hi' ? 'डैशबोर्ड' : 'Dashboard', icon: LayoutDashboard },
-    { to: '/test', label: language === 'mr' ? 'माती चाचणी' : language === 'hi' ? 'मृदा जांच' : 'Soil Test', icon: FlaskConical },
-    { to: '/report', label: language === 'mr' ? 'अहवाल' : language === 'hi' ? 'रिपोर्ट' : 'Report', icon: FileSpreadsheet },
-    { to: '/crops', label: language === 'mr' ? 'पीक नियोजन' : language === 'hi' ? 'फसल योजना' : 'Crops', icon: Sprout },
-    { to: '/mandi-weather', label: language === 'mr' ? 'बाजार व हवामान' : language === 'hi' ? 'मंडी व मौसम' : 'Markets', icon: CloudSun },
-    { to: '/assistant', label: language === 'mr' ? 'AI सल्लागार' : language === 'hi' ? 'AI सलाहकार' : 'AI Help', icon: Bot },
-    { to: '/device', label: language === 'mr' ? 'डिव्हाइस' : language === 'hi' ? 'डिवाइस' : 'Device', icon: Cpu },
+    { to: '/', label: language === 'mr' ? 'डॅशबोर्ड' : language === 'hi' ? 'डैशबोर्ड' : 'Dashboard' },
+    { to: '/test', label: language === 'mr' ? 'माती चाचणी' : language === 'hi' ? 'मृदा जांच' : 'Soil Analysis' },
+    { to: '/report', label: language === 'mr' ? 'अहवाल' : language === 'hi' ? 'रिपोर्ट' : 'Health Card' },
+    { to: '/crops', label: language === 'mr' ? 'पीक नियोजन' : language === 'hi' ? 'फसल योजना' : 'Crop Yield' },
+    { to: '/mandi-weather', label: language === 'mr' ? 'बाजारभाव' : language === 'hi' ? 'मंडी भाव' : 'Mandi Rates' },
+    { to: '/assistant', label: language === 'mr' ? 'AI सल्लागार' : language === 'hi' ? 'AI सलाहकार' : 'AI Advisory' },
+    { to: '/device', label: language === 'mr' ? 'डिव्हाइस' : language === 'hi' ? 'डिवाइस' : 'IoT Device' },
   ];
 
   return (
     <>
-      {/* Floating Top App Bar */}
-      <header className="sticky top-4 z-50 px-4 max-w-7xl mx-auto w-full">
-        <div className="bg-[#181818]/95 backdrop-blur-xl border-2 border-white/15 text-white rounded-full px-5 py-3 shadow-float flex items-center justify-between gap-3">
+      {/* 1. Vertex Architectural Header */}
+      <header className="sticky top-0 z-50 bg-[#FBFBFA]/90 backdrop-blur-md border-b border-[#E5E7EB] px-4 sm:px-8 py-3.5 transition-all">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           
-          {/* Logo & Brand */}
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="w-10 h-10 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center">
-              <span className="text-xl">🌱</span>
-            </div>
-            <div className="hidden sm:block">
-              <div className="font-black text-base leading-tight text-white tracking-tight">Smart Soil</div>
-              <div className="text-xs text-emerald-400 font-bold">IoT Assistant</div>
-            </div>
-          </div>
-
-          {/* Active Plot Selector Pill */}
-          <div className="flex items-center gap-2 bg-white/15 px-4 py-1.5 rounded-full text-sm font-semibold border border-white/10">
-            <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
-            <select
-              value={selectedPlot?.plot_id || ''}
-              onChange={(e) => setSelectedPlotId(e.target.value)}
-              className="bg-transparent text-white font-bold focus:outline-none cursor-pointer max-w-[140px] sm:max-w-[200px] truncate text-sm"
+          {/* Brand Monogram */}
+          <div className="flex items-center gap-3">
+            <div
+              onClick={() => navigate('/')}
+              className="cursor-pointer flex items-center gap-2.5 group"
             >
-              {plots.map(p => (
-                <option key={p.plot_id} value={p.plot_id} className="bg-[#222] text-white">
-                  {p.label}
-                </option>
-              ))}
-            </select>
+              <div className="w-9 h-9 rounded-xl bg-[#111827] text-white flex items-center justify-center font-serif font-black text-lg shadow-sm group-hover:bg-[#B02310] transition-colors">
+                V
+              </div>
+              <div>
+                <span className="font-serif font-bold text-xl tracking-tight text-[#111827]">
+                  VERTEX
+                </span>
+                <span className="text-[10px] block font-sans tracking-widest uppercase text-[#B02310] font-bold -mt-1">
+                  Soil Intelligence
+                </span>
+              </div>
+            </div>
           </div>
 
-          {/* Desktop Nav Links */}
-          <nav className="hidden lg:flex items-center gap-1.5">
-            {navItems.slice(0, 6).map(item => {
-              const Icon = item.icon;
-              return (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  className={({ isActive }) =>
-                    `px-4 py-2 rounded-full text-sm font-bold transition-all duration-200 flex items-center gap-2 ${
-                      isActive
-                        ? 'bg-white text-black shadow-md scale-105'
-                        : 'text-white/80 hover:text-white hover:bg-white/10'
-                    }`
-                  }
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.label}</span>
-                </NavLink>
-              );
-            })}
+          {/* Desktop Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-6">
+            {navItems.map(item => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  `text-sm font-semibold tracking-tight transition-all relative py-1 ${
+                    isActive
+                      ? 'text-[#111827] font-extrabold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-[#B02310]'
+                      : 'text-[#6B7280] hover:text-[#111827]'
+                  }`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
           </nav>
 
-          {/* Right Controls: Language & Persona Switcher */}
-          <div className="flex items-center gap-2">
+          {/* Right Controls: Plot Dropdown, Language & Action */}
+          <div className="flex items-center gap-2 sm:gap-3">
             
-            {/* Language Switcher Pill */}
-            <div className="flex items-center bg-white/15 rounded-full p-1 text-xs font-bold border border-white/10">
+            {/* Active Plot Pill */}
+            <div className="hidden sm:flex items-center gap-1.5 bg-white border border-[#E5E7EB] rounded-full px-3 py-1.5 shadow-sm text-xs">
+              <MapPin className="w-3.5 h-3.5 text-[#B02310] shrink-0" />
+              <select
+                value={selectedPlot?.plot_id || ''}
+                onChange={(e) => setSelectedPlotId(e.target.value)}
+                className="bg-transparent text-[#111827] font-bold focus:outline-none cursor-pointer max-w-[130px] sm:max-w-[170px] truncate"
+              >
+                {plots.map(p => (
+                  <option key={p.plot_id} value={p.plot_id} className="text-black">
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Language Switcher */}
+            <div className="flex items-center bg-white border border-[#E5E7EB] rounded-full p-1 shadow-sm text-xs font-bold">
               {(['mr', 'hi', 'en'] as Language[]).map((l) => (
                 <button
                   key={l}
                   onClick={() => setLanguage(l)}
-                  className={`px-3 py-1 rounded-full transition-all text-xs ${
-                    language === l ? 'bg-white text-black font-black shadow' : 'text-white/80 hover:text-white'
+                  className={`px-2.5 py-1 rounded-full transition-all text-xs ${
+                    language === l
+                      ? 'bg-[#111827] text-white shadow-sm'
+                      : 'text-[#6B7280] hover:text-[#111827]'
                   }`}
                 >
                   {l === 'mr' ? 'मराठी' : l === 'hi' ? 'हिंदी' : 'EN'}
@@ -102,44 +109,37 @@ export const Navigation: React.FC = () => {
               ))}
             </div>
 
-            {/* Persona Switcher */}
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as UserRole)}
-              className="bg-white/15 text-white text-xs font-bold rounded-full px-3 py-1.5 focus:outline-none cursor-pointer hidden md:block border border-white/10"
-              title="Switch Persona / Role"
+            {/* Action CTA Button */}
+            <button
+              onClick={() => navigate('/test')}
+              className="bg-[#B02310] hover:bg-[#8F1A0A] text-white px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-sm transition-all hover:scale-105"
             >
-              <option value="farmer" className="bg-[#222]">Farmer</option>
-              <option value="operator" className="bg-[#222]">Operator</option>
-              <option value="agronomist" className="bg-[#222]">Agronomist</option>
-              <option value="admin" className="bg-[#222]">Admin</option>
-            </select>
+              <span>{language === 'mr' ? 'चाचणी' : 'New Test'}</span>
+              <ArrowUpRight className="w-4 h-4" />
+            </button>
+
           </div>
 
         </div>
       </header>
 
-      {/* Responsive Mobile Bottom Nav */}
-      <nav className="lg:hidden fixed bottom-4 left-4 right-4 z-50 bg-[#181818]/95 backdrop-blur-xl border-2 border-white/15 rounded-3xl shadow-float px-3 py-2.5 flex items-center justify-around">
-        {navItems.map(item => {
-          const Icon = item.icon;
-          return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                `flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition-all ${
-                  isActive
-                    ? 'text-white font-black bg-white/20 scale-105'
-                    : 'text-white/60 hover:text-white'
-                }`
-              }
-            >
-              <Icon className="w-5 h-5" />
-              <span className="text-xs font-bold mt-1 leading-none">{item.label}</span>
-            </NavLink>
-          );
-        })}
+      {/* 2. Responsive Bottom Nav for Mobile */}
+      <nav className="lg:hidden fixed bottom-3 left-3 right-3 z-50 bg-[#111827]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl px-2 py-2 flex items-center justify-around">
+        {navItems.map(item => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all ${
+                isActive
+                  ? 'text-white font-extrabold bg-[#B02310] shadow-sm scale-105'
+                  : 'text-white/60 hover:text-white'
+              }`
+            }
+          >
+            <span className="text-xs font-bold">{item.label}</span>
+          </NavLink>
+        ))}
       </nav>
     </>
   );

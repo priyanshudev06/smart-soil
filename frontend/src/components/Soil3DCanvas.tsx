@@ -6,19 +6,19 @@ interface Soil3DCanvasProps {
   height?: string;
 }
 
-export const Soil3DCanvas: React.FC<Soil3DCanvasProps> = ({ className = '', height = '260px' }) => {
+export const Soil3DCanvas: React.FC<Soil3DCanvasProps> = ({ className = '', height = '300px' }) => {
   const mountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!mountRef.current) return;
 
     const width = mountRef.current.clientWidth || 600;
-    const canvasHeight = mountRef.current.clientHeight || 260;
+    const canvasHeight = mountRef.current.clientHeight || 300;
 
     // 1. Scene, Camera, Renderer
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, width / canvasHeight, 0.1, 1000);
-    camera.position.set(0, 8, 14);
+    const camera = new THREE.PerspectiveCamera(40, width / canvasHeight, 0.1, 1000);
+    camera.position.set(0, 7, 13);
     camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
@@ -26,120 +26,113 @@ export const Soil3DCanvas: React.FC<Soil3DCanvasProps> = ({ className = '', heig
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     mountRef.current.appendChild(renderer.domElement);
 
-    // 2. Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    // 2. Lighting - Vertex architectural warm terracotta + steel blue palette
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0x10b981, 1.5);
-    dirLight.position.set(5, 10, 7);
-    scene.add(dirLight);
+    const dirLight1 = new THREE.DirectionalLight(0xb02310, 2.0); // Terracotta rust
+    dirLight1.position.set(6, 8, 5);
+    scene.add(dirLight1);
 
-    const pointLight = new THREE.PointLight(0xf59e0b, 2, 20);
-    pointLight.position.set(-4, 3, 2);
-    scene.add(pointLight);
+    const dirLight2 = new THREE.DirectionalLight(0x396a94, 1.8); // Steel blue
+    dirLight2.position.set(-6, 4, 3);
+    scene.add(dirLight2);
 
-    // 3. Undulating 3D Soil Terrain Mesh
-    const terrainGeo = new THREE.PlaneGeometry(16, 12, 32, 24);
+    // 3. Architectural Contour Terrain (Wireframe + Grid)
+    const terrainGeo = new THREE.PlaneGeometry(16, 12, 28, 20);
     terrainGeo.rotateX(-Math.PI / 2);
 
     const pos = terrainGeo.attributes.position;
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i);
       const z = pos.getZ(i);
-      const y = Math.sin(x * 0.5) * Math.cos(z * 0.5) * 0.8 + Math.sin(x * 1.2) * 0.3;
+      const y = Math.sin(x * 0.45) * Math.cos(z * 0.45) * 0.9 + Math.cos(x * 0.9) * 0.25;
       pos.setY(i, y);
     }
     terrainGeo.computeVertexNormals();
 
     const terrainMat = new THREE.MeshStandardMaterial({
-      color: 0x223322,
+      color: 0x1e0b09,
       wireframe: true,
-      roughness: 0.8,
-      metalness: 0.1,
+      roughness: 0.6,
+      metalness: 0.2,
     });
     const terrain = new THREE.Mesh(terrainGeo, terrainMat);
     terrain.position.set(0, -1, 0);
     scene.add(terrain);
 
-    // 4. Floating 3D Nutrient Spheres (pH, N, P, K)
-    const sphereGroup = new THREE.Group();
+    // 4. Floating Luxury Geometric Crystals (representing Soil Health Factors)
+    const crystalGroup = new THREE.Group();
 
-    // Emerald sphere (pH)
-    const phGeo = new THREE.SphereGeometry(0.55, 32, 32);
+    // Terracotta Icosahedron (pH Balance)
+    const phGeo = new THREE.IcosahedronGeometry(0.7, 0);
     const phMat = new THREE.MeshStandardMaterial({
-      color: 0x10b981,
-      emissive: 0x059669,
-      emissiveIntensity: 0.5,
+      color: 0xb02310,
       roughness: 0.2,
-      metalness: 0.4
+      metalness: 0.6,
+      wireframe: false
     });
-    const phSphere = new THREE.Mesh(phGeo, phMat);
-    phSphere.position.set(-3, 1.5, 0);
-    sphereGroup.add(phSphere);
+    const phMesh = new THREE.Mesh(phGeo, phMat);
+    phMesh.position.set(-3.2, 1.8, 0);
+    crystalGroup.add(phMesh);
 
-    // Blue sphere (Nitrogen)
-    const nGeo = new THREE.SphereGeometry(0.45, 32, 32);
+    // Steel Blue Octahedron (Nitrogen)
+    const nGeo = new THREE.OctahedronGeometry(0.65, 0);
     const nMat = new THREE.MeshStandardMaterial({
-      color: 0x3b82f6,
-      emissive: 0x1d4ed8,
-      emissiveIntensity: 0.5,
+      color: 0x396a94,
       roughness: 0.2,
-      metalness: 0.4
+      metalness: 0.7,
     });
-    const nSphere = new THREE.Mesh(nGeo, nMat);
-    nSphere.position.set(-1, 2.2, 1);
-    sphereGroup.add(nSphere);
+    const nMesh = new THREE.Mesh(nGeo, nMat);
+    nMesh.position.set(-1, 2.5, 1);
+    crystalGroup.add(nMesh);
 
-    // Purple sphere (Phosphorus)
-    const pGeo = new THREE.SphereGeometry(0.48, 32, 32);
+    // Architectural Emerald Dodecahedron (Phosphorus)
+    const pGeo = new THREE.DodecahedronGeometry(0.6, 0);
     const pMat = new THREE.MeshStandardMaterial({
-      color: 0xa855f7,
-      emissive: 0x7e22ce,
-      emissiveIntensity: 0.5,
-      roughness: 0.2,
-      metalness: 0.4
+      color: 0x047857,
+      roughness: 0.3,
+      metalness: 0.5,
     });
-    const pSphere = new THREE.Mesh(pGeo, pMat);
-    pSphere.position.set(1.5, 1.8, -0.5);
-    sphereGroup.add(pSphere);
+    const pMesh = new THREE.Mesh(pGeo, pMat);
+    pMesh.position.set(1.4, 2.0, -0.6);
+    crystalGroup.add(pMesh);
 
-    // Amber sphere (Potassium)
-    const kGeo = new THREE.SphereGeometry(0.52, 32, 32);
+    // Amber Gold Crystal (Potassium)
+    const kGeo = new THREE.TetrahedronGeometry(0.75, 0);
     const kMat = new THREE.MeshStandardMaterial({
-      color: 0xf59e0b,
-      emissive: 0xd97706,
-      emissiveIntensity: 0.5,
+      color: 0xd97706,
       roughness: 0.2,
-      metalness: 0.4
+      metalness: 0.8,
     });
-    const kSphere = new THREE.Mesh(kGeo, kMat);
-    kSphere.position.set(3.2, 1.2, 0.5);
-    sphereGroup.add(kSphere);
+    const kMesh = new THREE.Mesh(kGeo, kMat);
+    kMesh.position.set(3.4, 1.4, 0.6);
+    crystalGroup.add(kMesh);
 
-    scene.add(sphereGroup);
+    scene.add(crystalGroup);
 
-    // 5. Floating Dust / Bio-Particles
-    const particleCount = 80;
+    // 5. Floating Dust / Agro Particles
+    const particleCount = 70;
     const particleGeo = new THREE.BufferGeometry();
     const particlePositions = new Float32Array(particleCount * 3);
 
     for (let i = 0; i < particleCount * 3; i += 3) {
       particlePositions[i] = (Math.random() - 0.5) * 16;
-      particlePositions[i + 1] = Math.random() * 5;
+      particlePositions[i + 1] = Math.random() * 5.5;
       particlePositions[i + 2] = (Math.random() - 0.5) * 10;
     }
     particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
 
     const particleMat = new THREE.PointsMaterial({
-      color: 0x6ee7b7,
+      color: 0xb02310,
       size: 0.08,
       transparent: true,
-      opacity: 0.8
+      opacity: 0.6
     });
     const particles = new THREE.Points(particleGeo, particleMat);
     scene.add(particles);
 
-    // 6. Interactive Mouse Movement Listener
+    // 6. Interactive Mouse Movement
     let mouseX = 0;
     let mouseY = 0;
     let targetX = 0;
@@ -160,30 +153,36 @@ export const Soil3DCanvas: React.FC<Soil3DCanvasProps> = ({ className = '', heig
       animId = requestAnimationFrame(animate);
       const elapsedTime = clock.getElapsedTime();
 
-      // Smooth mouse parallax
       targetX += (mouseX - targetX) * 0.05;
       targetY += (mouseY - targetY) * 0.05;
 
-      terrain.rotation.z = targetX * 0.1;
-      terrain.rotation.x = -Math.PI / 2 + targetY * 0.08;
+      terrain.rotation.z = targetX * 0.12;
+      terrain.rotation.x = -Math.PI / 2 + targetY * 0.1;
 
-      // Floating spheres wave animation
-      phSphere.position.y = 1.5 + Math.sin(elapsedTime * 1.5) * 0.25;
-      nSphere.position.y = 2.2 + Math.cos(elapsedTime * 1.8) * 0.3;
-      pSphere.position.y = 1.8 + Math.sin(elapsedTime * 1.2 + 1) * 0.25;
-      kSphere.position.y = 1.2 + Math.cos(elapsedTime * 1.4 + 2) * 0.3;
+      // Crystals rotate and float elegantly
+      phMesh.rotation.x += 0.01;
+      phMesh.rotation.y += 0.015;
+      phMesh.position.y = 1.8 + Math.sin(elapsedTime * 1.6) * 0.25;
 
-      sphereGroup.rotation.y = elapsedTime * 0.15 + targetX * 0.3;
+      nMesh.rotation.y += 0.02;
+      nMesh.rotation.z += 0.01;
+      nMesh.position.y = 2.5 + Math.cos(elapsedTime * 1.8) * 0.3;
 
-      // Particles rotation
-      particles.rotation.y = elapsedTime * 0.05;
+      pMesh.rotation.x += 0.015;
+      pMesh.position.y = 2.0 + Math.sin(elapsedTime * 1.3 + 1) * 0.25;
+
+      kMesh.rotation.y += 0.02;
+      kMesh.rotation.x += 0.01;
+      kMesh.position.y = 1.4 + Math.cos(elapsedTime * 1.5 + 2) * 0.3;
+
+      crystalGroup.rotation.y = elapsedTime * 0.15 + targetX * 0.3;
+      particles.rotation.y = elapsedTime * 0.04;
 
       renderer.render(scene, camera);
     };
 
     animate();
 
-    // 8. Resize Handler
     const handleResize = () => {
       if (!mountRef.current) return;
       const w = mountRef.current.clientWidth;
@@ -209,7 +208,7 @@ export const Soil3DCanvas: React.FC<Soil3DCanvasProps> = ({ className = '', heig
   return (
     <div
       ref={mountRef}
-      className={`w-full overflow-hidden rounded-3xl relative pointer-events-none ${className}`}
+      className={`w-full overflow-hidden relative pointer-events-none ${className}`}
       style={{ height }}
     />
   );

@@ -2,16 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FlaskConical,
-  Clock,
   Play,
   Pause,
   RotateCcw,
   CheckCircle2,
-  AlertTriangle,
-  Cpu,
   ArrowRight,
   Zap,
-  Sliders
+  Sliders,
+  Cpu
 } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import { api } from '../services/api';
@@ -33,8 +31,6 @@ export const SoilTestingPage: React.FC = () => {
     b: 650,
     c: 2860
   });
-  const [customTemp, setCustomTemp] = useState<number>(27.5);
-  const [errorMsg, setErrorMsg] = useState<string>('');
 
   useEffect(() => {
     let interval: any = null;
@@ -50,27 +46,23 @@ export const SoilTestingPage: React.FC = () => {
 
   const executeMeasurement = async () => {
     setIsScanning(true);
-    setErrorMsg('');
-    setScanProgress(15);
+    setScanProgress(20);
 
     try {
-      for (let p = 30; p <= 90; p += 30) {
+      for (let p = 40; p <= 90; p += 30) {
         await new Promise(r => setTimeout(r, 200));
         setScanProgress(p);
       }
 
-      const uniqueMsgId = `msg-hw-${Date.now()}`;
-      const testSessionId = `test-session-${Date.now()}`;
-
       const payload = {
         schema_version: "1.0",
-        message_id: uniqueMsgId,
+        message_id: `msg-vertex-${Date.now()}`,
         device_id: device?.device_id || "soil-reader-001",
         firmware_version: device?.firmware_version || "1.0.0",
-        test_id: testSessionId,
+        test_id: `test-session-${Date.now()}`,
         kit: { kit_id: "kit-agri-chem-4in1", lot: "LOT-2026-NOV", parameter: parameter },
         captured_at: new Date().toISOString(),
-        temperature_c: customTemp,
+        temperature_c: 27.5,
         sensor: {
           model: "TCS34725",
           r: simulatedChannels.r,
@@ -95,57 +87,53 @@ export const SoilTestingPage: React.FC = () => {
       setStep(4);
     } catch {
       setIsScanning(false);
-      setErrorMsg("Failed to capture reading. Please retry.");
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-24 pt-6 px-4">
+    <div className="max-w-4xl mx-auto space-y-8 pb-24 pt-6 px-4 sm:px-8">
       
-      {/* Step Pills */}
-      <div className="bg-white border-2 border-[#D9D7D0] rounded-full p-2.5 shadow-soft flex items-center justify-between text-sm font-black px-6">
+      {/* Vertex Stage Indicator */}
+      <div className="grid grid-cols-4 gap-2 bg-white border border-[#E5E7EB] rounded-2xl p-3 shadow-sm">
         {[
-          { num: 1, label: '1. Select Test' },
-          { num: 2, label: '2. 60s Reaction' },
-          { num: 3, label: '3. Scan' },
-          { num: 4, label: '4. Result' },
-        ].map((s) => (
+          { num: '01', title: 'Target Metric' },
+          { num: '02', title: '60s Incubation' },
+          { num: '03', title: 'Spectro-Scan' },
+          { num: '04', title: 'Verified Output' },
+        ].map((s, idx) => (
           <div
             key={s.num}
-            className={`flex items-center gap-2 ${
-              step >= s.num ? 'text-emerald-700' : 'text-muted'
+            className={`py-2 px-3 rounded-xl transition-all ${
+              step >= idx + 1
+                ? 'bg-[#111827] text-white shadow-sm'
+                : 'text-muted'
             }`}
           >
-            <span
-              className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black ${
-                step >= s.num ? 'bg-emerald-600 text-white' : 'bg-line text-muted'
-              }`}
-            >
-              {s.num}
-            </span>
-            <span className="hidden sm:inline text-sm">{s.label}</span>
+            <div className="text-[11px] font-mono tracking-widest">{s.num}</div>
+            <div className="text-xs font-bold truncate">{s.title}</div>
           </div>
         ))}
       </div>
 
       {/* STEP 1: Select Parameter */}
       {step === 1 && (
-        <div className="bg-[#FFFDF8] border-2 border-[#D9D7D0] rounded-3xl p-6 sm:p-10 shadow-soft space-y-6">
+        <div className="bg-white border border-[#E5E7EB] rounded-3xl p-8 sm:p-12 shadow-sm space-y-6">
           <div>
-            <h2 className="text-3xl font-black text-[#1B1B1B] tracking-tight">
-              {language === 'mr' ? 'कोणती चाचणी करायची आहे?' : 'What do you want to test?'}
+            <span className="text-xs font-black tracking-widest uppercase text-[#B02310]">STAGE 01</span>
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#111827] mt-1">
+              Select Soil Chemical Index
             </h2>
-            <p className="text-base text-muted font-medium mt-1">
-              Field: <strong className="text-black">{selectedPlot?.label}</strong>
+            <p className="text-sm text-muted mt-1">
+              Plot: <strong className="text-black">{selectedPlot?.label}</strong> ({selectedPlot?.area} Acres)
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
-              { id: 'pH', title: 'Soil pH (सामू)', tag: 'Soil Acidity / Alkalinity', color: 'border-emerald-500 bg-emerald-50/50', rgb: { r: 1220, g: 990, b: 650, c: 2860 } },
-              { id: 'Nitrogen (N)', title: 'Nitrogen (नत्र - N)', tag: 'Growth & Green Foliage', color: 'border-blue-500 bg-blue-50/50', rgb: { r: 1450, g: 780, b: 920, c: 3150 } },
-              { id: 'Phosphorus (P)', title: 'Phosphorus (स्फुरद - P)', tag: 'Root Strength & Flowering', color: 'border-purple-500 bg-purple-50/50', rgb: { r: 720, g: 890, b: 1540, c: 3150 } },
-              { id: 'Potassium (K)', title: 'Potassium (पालाश - K)', tag: 'Drought & Pest Resistance', color: 'border-amber-500 bg-amber-50/50', rgb: { r: 1650, g: 1350, b: 540, c: 3540 } }
+              { id: 'pH', title: 'Soil pH (सामू)', desc: 'Acidity / Alkalinity level (Optimal: 6.5 - 7.5)', rgb: { r: 1220, g: 990, b: 650, c: 2860 } },
+              { id: 'Nitrogen (N)', title: 'Nitrogen (नत्र - N)', desc: 'Vegetative vigor & leaf chlorophyll index', rgb: { r: 1450, g: 780, b: 920, c: 3150 } },
+              { id: 'Phosphorus (P)', title: 'Phosphorus (स्फुरद - P)', desc: 'Root development and early establishment', rgb: { r: 720, g: 890, b: 1540, c: 3150 } },
+              { id: 'Potassium (K)', title: 'Potassium (पालाश - K)', desc: 'Drought and pest defense resilience', rgb: { r: 1650, g: 1350, b: 540, c: 3540 } },
             ].map(p => (
               <div
                 key={p.id}
@@ -155,45 +143,47 @@ export const SoilTestingPage: React.FC = () => {
                 }}
                 className={`p-6 rounded-2xl border-2 cursor-pointer transition-all ${
                   parameter === p.id
-                    ? `${p.color} ring-4 ring-emerald-500/20 shadow-md`
-                    : 'bg-white border-[#D9D7D0] hover:border-black'
+                    ? 'border-[#B02310] bg-[#B02310]/5 shadow-sm'
+                    : 'border-[#E5E7EB] bg-[#FBFBFA] hover:border-[#111827]'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="text-xl font-black text-[#1B1B1B]">{p.title}</div>
-                  {parameter === p.id && <CheckCircle2 className="w-6 h-6 text-emerald-600" />}
+                  <div className="font-serif text-xl font-bold text-[#111827]">{p.title}</div>
+                  {parameter === p.id && <CheckCircle2 className="w-5 h-5 text-[#B02310]" />}
                 </div>
-                <div className="text-sm font-bold text-muted mt-1">{p.tag}</div>
+                <div className="text-xs text-[#6B7280] font-medium mt-1">{p.desc}</div>
               </div>
             ))}
           </div>
 
-          <div className="flex justify-end pt-4">
+          <div className="flex justify-end pt-4 border-t border-[#E5E7EB]">
             <button
               onClick={() => setStep(2)}
-              className="bg-[#181818] hover:bg-black text-white px-8 py-4 rounded-full text-base font-bold flex items-center gap-2 shadow-float hover:scale-105 transition-all"
+              className="bg-[#111827] hover:bg-[#B02310] text-white px-8 py-4 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm transition-all"
             >
-              <span>Continue &rarr;</span>
+              <span>Continue to Incubation &rarr;</span>
             </button>
           </div>
         </div>
       )}
 
-      {/* STEP 2: Chemical Wait Timer */}
+      {/* STEP 2: Chemical Reaction Wait Period */}
       {step === 2 && (
-        <div className="bg-[#FFFDF8] border-2 border-[#D9D7D0] rounded-3xl p-6 sm:p-10 shadow-soft space-y-6 text-center">
+        <div className="bg-white border border-[#E5E7EB] rounded-3xl p-8 sm:p-12 shadow-sm space-y-6 text-center">
           <div>
-            <h2 className="text-3xl font-black text-[#1B1B1B]">
-              Wait 60 Seconds for Color to React
+            <span className="text-xs font-black tracking-widest uppercase text-[#B02310]">STAGE 02</span>
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#111827] mt-1">
+              60-Second Reaction Timer
             </h2>
-            <p className="text-base text-muted font-medium mt-1">
-              Dip test strip in soil solution, then start the countdown timer.
+            <p className="text-sm text-muted mt-1">
+              Dip reacted test strip into the supernatant solution. Wait 60s for full dye development.
             </p>
           </div>
 
-          {/* Big Digital Countdown Timer */}
-          <div className="bg-[#F0EFEB] rounded-3xl p-8 border-2 border-[#D9D7D0] space-y-4">
-            <div className="text-7xl sm:text-8xl font-black text-[#1B1B1B] font-mono tracking-tight">
+          {/* Large Architectural Digital Countdown Clock */}
+          <div className="bg-[#1E0B09] text-white rounded-3xl p-10 max-w-lg mx-auto shadow-md space-y-4">
+            <div className="text-xs uppercase tracking-widest text-white/60 font-mono">Elapsed Reaction Time</div>
+            <div className="text-7xl sm:text-8xl font-serif font-bold text-white tracking-tight">
               00:{timerSeconds < 10 ? `0${timerSeconds}` : timerSeconds}
             </div>
 
@@ -201,131 +191,132 @@ export const SoilTestingPage: React.FC = () => {
               {!timerRunning ? (
                 <button
                   onClick={() => setTimerRunning(true)}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full text-base font-bold flex items-center gap-2 shadow-float"
+                  className="bg-[#B02310] hover:bg-[#8F1A0A] text-white px-8 py-3.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm"
                 >
-                  <Play className="w-5 h-5 fill-current" />
-                  <span>Start 60s Timer</span>
+                  <Play className="w-4 h-4 fill-current" />
+                  <span>Start 60s Countdown</span>
                 </button>
               ) : (
                 <button
                   onClick={() => setTimerRunning(false)}
-                  className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 rounded-full text-base font-bold flex items-center gap-2 shadow-float"
+                  className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-3.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm"
                 >
-                  <Pause className="w-5 h-5 fill-current" />
-                  <span>Pause Timer</span>
+                  <Pause className="w-4 h-4 fill-current" />
+                  <span>Pause</span>
                 </button>
               )}
               <button
                 onClick={() => { setTimerRunning(false); setTimerSeconds(60); }}
-                className="bg-white border-2 border-[#D9D7D0] text-[#1B1B1B] px-6 py-4 rounded-full text-base font-bold hover:bg-gray-100"
+                className="bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-full text-sm font-semibold border border-white/20"
               >
                 Reset
               </button>
             </div>
           </div>
 
-          <div className="flex justify-between items-center pt-4">
-            <button onClick={() => setStep(1)} className="text-sm font-bold text-muted hover:text-black">
+          <div className="flex justify-between items-center pt-4 border-t border-[#E5E7EB]">
+            <button onClick={() => setStep(1)} className="text-sm font-semibold text-muted hover:text-black">
               &larr; Back
             </button>
             <button
               onClick={() => setStep(3)}
-              className="bg-[#181818] hover:bg-black text-white px-8 py-4 rounded-full text-base font-bold flex items-center gap-2 shadow-float hover:scale-105 transition-all"
+              className="bg-[#111827] hover:bg-[#B02310] text-white px-8 py-4 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm transition-all"
             >
-              <span>Place Strip in Device &rarr;</span>
+              <span>Insert in Reader Chamber &rarr;</span>
             </button>
           </div>
         </div>
       )}
 
-      {/* STEP 3: Scan with Spectro-Reader */}
+      {/* STEP 3: Optical Reader Scan */}
       {step === 3 && (
-        <div className="bg-[#FFFDF8] border-2 border-[#D9D7D0] rounded-3xl p-6 sm:p-10 shadow-soft space-y-6">
+        <div className="bg-white border border-[#E5E7EB] rounded-3xl p-8 sm:p-12 shadow-sm space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-3xl font-black text-[#1B1B1B]">
-                Trigger Optical Spectro-Scan
+              <span className="text-xs font-black tracking-widest uppercase text-[#B02310]">STAGE 03</span>
+              <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#111827] mt-1">
+                Trigger Spectro-Scan
               </h2>
-              <p className="text-base text-muted font-medium mt-1">
-                Reading TCS34725 sensor channels under internal calibrated LED
+              <p className="text-sm text-muted mt-1">
+                TCS34725 optical spectral acquisition under controlled white LED
               </p>
             </div>
-            <span className="px-3.5 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black">
-              Device Online
+            <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+              Chamber Ready
             </span>
           </div>
 
-          {/* Sensor Channels Preview */}
+          {/* Telemetry Channel Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-            <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-4">
-              <div className="text-xs font-bold text-red-700">Red (R)</div>
-              <div className="text-3xl font-black text-red-950 mt-1">{simulatedChannels.r}</div>
+            <div className="bg-[#FBFBFA] border border-[#E5E7EB] rounded-2xl p-4">
+              <div className="text-xs font-mono font-bold text-[#B02310] uppercase">Red (R)</div>
+              <div className="text-3xl font-serif font-black text-[#111827] mt-1">{simulatedChannels.r}</div>
             </div>
-            <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-4">
-              <div className="text-xs font-bold text-green-700">Green (G)</div>
-              <div className="text-3xl font-black text-green-950 mt-1">{simulatedChannels.g}</div>
+            <div className="bg-[#FBFBFA] border border-[#E5E7EB] rounded-2xl p-4">
+              <div className="text-xs font-mono font-bold text-[#047857] uppercase">Green (G)</div>
+              <div className="text-3xl font-serif font-black text-[#111827] mt-1">{simulatedChannels.g}</div>
             </div>
-            <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-4">
-              <div className="text-xs font-bold text-blue-700">Blue (B)</div>
-              <div className="text-3xl font-black text-blue-950 mt-1">{simulatedChannels.b}</div>
+            <div className="bg-[#FBFBFA] border border-[#E5E7EB] rounded-2xl p-4">
+              <div className="text-xs font-mono font-bold text-[#396A94] uppercase">Blue (B)</div>
+              <div className="text-3xl font-serif font-black text-[#111827] mt-1">{simulatedChannels.b}</div>
             </div>
-            <div className="bg-gray-100 border-2 border-gray-300 rounded-2xl p-4">
-              <div className="text-xs font-bold text-gray-700">Clear (C)</div>
-              <div className="text-3xl font-black text-gray-950 mt-1">{simulatedChannels.c}</div>
+            <div className="bg-[#FBFBFA] border border-[#E5E7EB] rounded-2xl p-4">
+              <div className="text-xs font-mono font-bold text-[#4B5563] uppercase">Clear (C)</div>
+              <div className="text-3xl font-serif font-black text-[#111827] mt-1">{simulatedChannels.c}</div>
             </div>
           </div>
 
           {isScanning && (
             <div className="space-y-2">
-              <div className="flex justify-between text-sm font-bold text-emerald-800">
-                <span>Calibrating spectral reflectance...</span>
+              <div className="flex justify-between text-xs font-bold text-[#B02310]">
+                <span>Processing optical spectral reflectance...</span>
                 <span>{scanProgress}%</span>
               </div>
-              <div className="w-full bg-line rounded-full h-3 overflow-hidden">
+              <div className="w-full bg-[#E5E7EB] rounded-full h-2 overflow-hidden">
                 <div
-                  className="bg-emerald-600 h-3 rounded-full transition-all duration-300"
+                  className="bg-[#B02310] h-2 rounded-full transition-all duration-300"
                   style={{ width: `${scanProgress}%` }}
                 />
               </div>
             </div>
           )}
 
-          <div className="flex justify-between items-center pt-4">
-            <button onClick={() => setStep(2)} className="text-sm font-bold text-muted hover:text-black">
+          <div className="flex justify-between items-center pt-4 border-t border-[#E5E7EB]">
+            <button onClick={() => setStep(2)} className="text-sm font-semibold text-muted hover:text-black">
               &larr; Back
             </button>
             <button
               disabled={isScanning}
               onClick={executeMeasurement}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-4 rounded-full text-lg font-black flex items-center gap-2 shadow-float hover:scale-105 transition-all"
+              className="bg-[#B02310] hover:bg-[#8F1A0A] text-white px-10 py-4 rounded-full text-base font-bold flex items-center gap-2 shadow-sm transition-all hover:scale-105"
             >
-              <Zap className="w-5 h-5 fill-current" />
-              <span>{isScanning ? 'Scanning...' : 'Scan Now & Save'}</span>
+              <Zap className="w-4 h-4 fill-current" />
+              <span>{isScanning ? 'Acquiring Spectrum...' : 'Scan & Ingest to Database'}</span>
             </button>
           </div>
         </div>
       )}
 
-      {/* STEP 4: Completed */}
+      {/* STEP 4: Success & Result */}
       {step === 4 && (
-        <div className="bg-white border-2 border-[#D9D7D0] rounded-3xl p-10 shadow-float text-center space-y-6">
-          <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
-            <CheckCircle2 className="w-12 h-12" />
+        <div className="bg-white border border-[#E5E7EB] rounded-3xl p-10 sm:p-14 shadow-sm text-center space-y-6">
+          <div className="w-16 h-16 bg-emerald-50 text-emerald-700 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-300">
+            <CheckCircle2 className="w-10 h-10" />
           </div>
 
-          <h2 className="text-4xl font-black text-[#1B1B1B]">
-            Measurement Complete!
+          <h2 className="font-serif text-3xl sm:text-5xl font-bold text-[#111827]">
+            Spectro-Analysis Saved
           </h2>
-          <p className="text-base text-muted font-medium">
-            Your soil sample has been processed and saved to the database.
+          <p className="text-base text-muted max-w-md mx-auto">
+            Raw spectral counts successfully saved to SQLite database with temperature compensation.
           </p>
 
-          <div className="pt-4 flex flex-wrap justify-center gap-4">
+          <div className="pt-4 flex justify-center gap-4">
             <button
               onClick={() => navigate('/report')}
-              className="bg-[#181818] hover:bg-black text-white px-10 py-4 rounded-full text-lg font-bold shadow-float hover:scale-105 transition-all"
+              className="bg-[#111827] hover:bg-[#B02310] text-white px-8 py-4 rounded-full text-base font-bold shadow-sm hover:scale-105 transition-all"
             >
-              View Soil Report Card &rarr;
+              Open Soil Health Certificate &rarr;
             </button>
           </div>
         </div>
