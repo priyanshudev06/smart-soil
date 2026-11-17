@@ -2,16 +2,19 @@ import React, { useState, useEffect } from 'react';
 import {
   TrendingUp,
   CloudSun,
-  ShieldCheck,
-  Calendar,
   MapPin,
-  Clock,
+  Calendar,
+  Layers,
   Sparkles,
-  Info
+  ArrowUpRight,
+  Droplets,
+  Wind
 } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import { api } from '../services/api';
 import { MandiItem, WeatherDay } from '../types';
+import { Card3D } from '../components/Card3D';
+import { PopUpModal } from '../components/PopUpModal';
 
 export const MandiWeatherPage: React.FC = () => {
   const { language, farmer } = useApp();
@@ -20,6 +23,10 @@ export const MandiWeatherPage: React.FC = () => {
   const [mandi, setMandi] = useState<MandiItem[]>([]);
   const [weather, setWeather] = useState<WeatherDay[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
+  // Pop-up modal state
+  const [activeWeatherModal, setActiveWeatherModal] = useState<WeatherDay | null>(null);
+  const [activeMandiModal, setActiveMandiModal] = useState<MandiItem | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -34,29 +41,31 @@ export const MandiWeatherPage: React.FC = () => {
   }, [district]);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-20 pt-4 px-4">
-      {/* Header */}
-      <div className="bg-[#FFFDF8] border border-[#D9D7D0] rounded-3xl p-6 shadow-soft flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold uppercase tracking-wider mb-1">
-            <CloudSun className="w-3.5 h-3.5" />
-            Verified Agmarknet & IMD Feeds
+    <div className="max-w-7xl mx-auto space-y-10 pb-24 pt-6 px-4 sm:px-8">
+      
+      {/* 1. Header Banner */}
+      <div className="relative rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-cyan-950 p-8 sm:p-10 text-white shadow-xl border border-slate-800 overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="space-y-2 z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-black uppercase tracking-wider">
+            <CloudSun className="w-4 h-4 text-cyan-400" />
+            Verified Agmarknet & IMD Telemetry
           </div>
-          <h1 className="text-2xl font-black text-[#1B1B1B]">
-            {language === 'mr' ? 'बाजारभाव व हवामान अंदाज' : 'Live Mandi Prices & 5-Day Weather'}
+          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            {language === 'mr' ? 'बाजारभाव व ५-दिवसीय हवामान' : 'Mandi Rates & 5-Day Weather'}
           </h1>
-          <p className="text-xs text-muted mt-1">
-            Daily market arrivals and meteorological advisories for {district} district
+          <p className="text-sm sm:text-base text-slate-300 font-medium">
+            Real-time market arrivals and meteorological spraying advisories for <strong className="text-white">{district}</strong>
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-white border border-[#D9D7D0] rounded-full px-4 py-2 text-xs">
-          <MapPin className="w-4 h-4 text-emerald-600" />
-          <span className="font-semibold text-muted">District:</span>
+        {/* District Selector Pill */}
+        <div className="z-10 flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-2xl">
+          <MapPin className="w-4 h-4 text-cyan-400" />
+          <span className="text-xs font-bold text-slate-300">District:</span>
           <select
             value={district}
             onChange={(e) => setDistrict(e.target.value)}
-            className="bg-transparent font-bold text-[#1B1B1B] focus:outline-none cursor-pointer"
+            className="bg-slate-900 text-white rounded-lg px-2 py-1 font-bold text-xs focus:outline-none border border-slate-700 cursor-pointer"
           >
             <option value="Pune">Pune (पुणे)</option>
             <option value="Nashik">Nashik (नाशिक)</option>
@@ -66,94 +75,194 @@ export const MandiWeatherPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 5-Day Agro-Weather Forecast */}
+      {/* 2. 5-Day Weather Forecast in 3D Cards */}
       <div className="space-y-4">
-        <h2 className="text-lg font-bold text-[#1B1B1B] flex items-center gap-2">
-          <CloudSun className="w-5 h-5 text-blue-600" />
-          <span>5-Day Weather Forecast & Farm Action Advisories:</span>
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <CloudSun className="w-7 h-7 text-cyan-600" />
+            <span>5-Day Agro-Weather Forecast</span>
+          </h2>
+          <span className="text-xs font-bold bg-cyan-100 text-cyan-800 px-3 py-1 rounded-full hidden sm:inline">
+            Click day for spraying advisory
+          </span>
+        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          {weather.map((w, i) => (
-            <div
-              key={i}
-              className="bg-white border border-[#D9D7D0] rounded-2xl p-4 shadow-soft space-y-2 flex flex-col justify-between"
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          {weather.map((w, idx) => (
+            <Card3D
+              key={idx}
+              glowColor="blue"
+              onClick={() => setActiveWeatherModal(w)}
+              className="p-5 flex flex-col justify-between"
             >
-              <div>
-                <div className="flex items-center justify-between text-xs text-muted">
-                  <span className="font-bold text-[#1B1B1B]">{w.day}</span>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-xs text-slate-400 font-extrabold uppercase">
+                  <span className="text-slate-900 font-black text-sm">{w.day}</span>
                   <span>{w.date}</span>
                 </div>
-                <div className="text-sm font-extrabold text-blue-900 mt-2">
+
+                <div className="text-sm font-black text-cyan-700">
                   {language === 'mr' ? w.condition_local : w.condition}
                 </div>
-                <div className="text-2xl font-black text-[#1B1B1B] mt-1">
-                  {w.temp_max}° <span className="text-xs font-normal text-muted">/ {w.temp_min}°C</span>
+
+                <div className="text-3xl font-black text-slate-900">
+                  {w.temp_max}° <span className="text-xs font-normal text-slate-400">/ {w.temp_min}°C</span>
                 </div>
-                <div className="text-[11px] text-muted mt-1">
-                  Humidity: {w.humidity}% • Rain: {w.rainfall_probability}%
+
+                <div className="flex items-center gap-3 text-xs text-slate-500 font-semibold pt-1">
+                  <span className="flex items-center gap-1">
+                    <Droplets className="w-3.5 h-3.5 text-blue-500" /> {w.rainfall_probability}%
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Wind className="w-3.5 h-3.5 text-cyan-500" /> {w.humidity}%
+                  </span>
                 </div>
               </div>
 
-              <div className="mt-3 pt-2.5 border-t border-line/60 bg-[#F0EFEB] rounded-xl p-2 text-[10px] text-[#1B1B1B] leading-tight">
-                <strong>Advisory:</strong> {w.advisory}
+              <div className="mt-4 pt-3 border-t border-slate-100 bg-slate-50 rounded-xl p-2.5 text-[11px] font-semibold text-slate-700 leading-snug line-clamp-2">
+                {w.advisory}
               </div>
-            </div>
+            </Card3D>
           ))}
         </div>
       </div>
 
-      {/* Mandi Rates Table */}
-      <div className="bg-[#FFFDF8] border border-[#D9D7D0] rounded-3xl p-6 shadow-soft space-y-4">
+      {/* 3. Mandi Market Prices in 3D Cards */}
+      <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-amber-600" />
-            <h2 className="text-lg font-bold text-[#1B1B1B]">
-              {language === 'mr' ? 'अधिकृत कृषी उत्पन्न बाजार समिती (APMC) भाव' : 'Official APMC Mandi Market Prices'}
-            </h2>
-          </div>
-          <span className="text-xs text-muted">Source: AGMARKNET (agmarknet.gov.in)</span>
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <TrendingUp className="w-7 h-7 text-emerald-600" />
+            <span>Live APMC Market Rates</span>
+          </h2>
+          <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full hidden sm:inline">
+            Updated today &bull; Agmarknet
+          </span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="border-b border-[#D9D7D0] text-muted uppercase tracking-wider text-[11px]">
-                <th className="py-2.5 px-3">Commodity</th>
-                <th className="py-2.5 px-3">Market Yard</th>
-                <th className="py-2.5 px-3">Modal Price (मध्यम)</th>
-                <th className="py-2.5 px-3">Min / Max Range</th>
-                <th className="py-2.5 px-3">Unit</th>
-                <th className="py-2.5 px-3">Date & Source</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line/60">
-              {mandi.map((item, idx) => (
-                <tr key={idx} className="hover:bg-black/[0.02]">
-                  <td className="py-3 px-3 font-bold text-[#1B1B1B]">
-                    {language === 'mr' ? item.commodity_mr : item.commodity}
-                  </td>
-                  <td className="py-3 px-3 text-muted">{item.market}</td>
-                  <td className="py-3 px-3">
-                    <span className="text-base font-black text-emerald-800">
-                      ₹{item.modal_price.toLocaleString('en-IN')}
-                    </span>
-                  </td>
-                  <td className="py-3 px-3 text-muted">
-                    ₹{item.min_price} - ₹{item.max_price}
-                  </td>
-                  <td className="py-3 px-3 text-muted">{item.unit}</td>
-                  <td className="py-3 px-3">
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-semibold border border-emerald-300">
-                      {item.observed_date}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {mandi.map((item, idx) => {
+            const isHigh = item.modal_price >= (item.min_price + item.max_price) / 2;
+            const displayName = language === 'mr' ? item.commodity_mr : language === 'hi' ? item.commodity_hi : item.commodity;
+            return (
+              <Card3D
+                key={idx}
+                glowColor={isHigh ? 'emerald' : 'amber'}
+                onClick={() => setActiveMandiModal(item)}
+                className="p-6 flex flex-col justify-between"
+              >
+                <div className="space-y-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                        {item.market}
+                      </span>
+                      <h3 className="text-2xl font-black text-slate-900 mt-1">
+                        {displayName}
+                      </h3>
+                    </div>
+
+                    <div className={`px-2.5 py-1 rounded-full text-xs font-black flex items-center gap-1 ${
+                      isHigh
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : 'bg-amber-100 text-amber-800'
+                    }`}>
+                      <TrendingUp className="w-3.5 h-3.5" />
+                      {isHigh ? '+High' : 'Steady'}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-xs font-bold text-slate-500 block">Modal Price ({item.unit})</span>
+                    <div className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mt-1">
+                      ₹{item.modal_price.toLocaleString()}
+                    </div>
+                    <div className="text-xs text-slate-400 font-semibold mt-1">
+                      Range: ₹{item.min_price} – ₹{item.max_price}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-600">
+                  <span>View Trade Intel</span>
+                  <ArrowUpRight className="w-4 h-4" />
+                </div>
+              </Card3D>
+            );
+          })}
         </div>
       </div>
+
+      {/* PopUp Modal for Weather Advisory */}
+      <PopUpModal
+        isOpen={!!activeWeatherModal}
+        onClose={() => setActiveWeatherModal(null)}
+        title={`${activeWeatherModal?.day} (${activeWeatherModal?.date})`}
+        subtitle="Agrometeorological Advisory & Spraying Window"
+      >
+        {activeWeatherModal && (
+          <div className="space-y-4">
+            <div className="p-4 rounded-2xl bg-cyan-50 border border-cyan-200">
+              <span className="text-xs font-black text-cyan-800 uppercase tracking-wider block mb-1">
+                Official Recommendation
+              </span>
+              <p className="text-sm font-bold text-slate-800 leading-relaxed">
+                {activeWeatherModal.advisory}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 text-xs font-semibold">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <span className="text-slate-500 block">Temperature Range</span>
+                <span className="text-base font-black text-slate-900">
+                  {activeWeatherModal.temp_min}°C to {activeWeatherModal.temp_max}°C
+                </span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <span className="text-slate-500 block">Rainfall Probability</span>
+                <span className="text-base font-black text-slate-900">
+                  {activeWeatherModal.rainfall_probability}% Chance
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+      </PopUpModal>
+
+      {/* PopUp Modal for Mandi Commodity Details */}
+      <PopUpModal
+        isOpen={!!activeMandiModal}
+        onClose={() => setActiveMandiModal(null)}
+        title={activeMandiModal?.commodity || 'Market Price'}
+        subtitle={`APMC Mandi: ${activeMandiModal?.market}`}
+      >
+        {activeMandiModal && (
+          <div className="space-y-4">
+            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200">
+              <span className="text-xs font-black text-emerald-800 uppercase tracking-wider block mb-1">
+                Prevailing Modal Price
+              </span>
+              <div className="text-3xl font-black text-emerald-700">
+                ₹{activeMandiModal.modal_price} / {activeMandiModal.unit}
+              </div>
+              <p className="text-xs font-medium text-slate-600 mt-1">
+                Freshness: {activeMandiModal.freshness} &bull; Source: {activeMandiModal.source}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 text-xs font-semibold">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <span className="text-slate-500 block">Minimum Price</span>
+                <span className="text-base font-black text-slate-900">₹{activeMandiModal.min_price}</span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <span className="text-slate-500 block">Maximum Price</span>
+                <span className="text-base font-black text-slate-900">₹{activeMandiModal.max_price}</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </PopUpModal>
+
     </div>
   );
 };

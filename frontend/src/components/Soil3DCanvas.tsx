@@ -6,14 +6,14 @@ interface Soil3DCanvasProps {
   height?: string;
 }
 
-export const Soil3DCanvas: React.FC<Soil3DCanvasProps> = ({ className = '', height = '300px' }) => {
+export const Soil3DCanvas: React.FC<Soil3DCanvasProps> = ({ className = '', height = '280px' }) => {
   const mountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!mountRef.current) return;
 
     const width = mountRef.current.clientWidth || 600;
-    const canvasHeight = mountRef.current.clientHeight || 300;
+    const canvasHeight = mountRef.current.clientHeight || 280;
 
     // 1. Scene, Camera, Renderer
     const scene = new THREE.Scene();
@@ -26,19 +26,19 @@ export const Soil3DCanvas: React.FC<Soil3DCanvasProps> = ({ className = '', heig
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     mountRef.current.appendChild(renderer.domElement);
 
-    // 2. Lighting - Vertex architectural warm terracotta + steel blue palette
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+    // 2. Lighting - Electric Bio-Tech Palette
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
     scene.add(ambientLight);
 
-    const dirLight1 = new THREE.DirectionalLight(0xb02310, 2.0); // Terracotta rust
+    const dirLight1 = new THREE.DirectionalLight(0x10b981, 2.5); // Electric Emerald
     dirLight1.position.set(6, 8, 5);
     scene.add(dirLight1);
 
-    const dirLight2 = new THREE.DirectionalLight(0x396a94, 1.8); // Steel blue
+    const dirLight2 = new THREE.DirectionalLight(0x06b6d4, 2.0); // Electric Cyan
     dirLight2.position.set(-6, 4, 3);
     scene.add(dirLight2);
 
-    // 3. Architectural Contour Terrain (Wireframe + Grid)
+    // 3. 3D Wave Wireframe Contour
     const terrainGeo = new THREE.PlaneGeometry(16, 12, 28, 20);
     terrainGeo.rotateX(-Math.PI / 2);
 
@@ -46,64 +46,71 @@ export const Soil3DCanvas: React.FC<Soil3DCanvasProps> = ({ className = '', heig
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i);
       const z = pos.getZ(i);
-      const y = Math.sin(x * 0.45) * Math.cos(z * 0.45) * 0.9 + Math.cos(x * 0.9) * 0.25;
+      const y = Math.sin(x * 0.5) * Math.cos(z * 0.5) * 0.85 + Math.cos(x * 0.9) * 0.25;
       pos.setY(i, y);
     }
     terrainGeo.computeVertexNormals();
 
     const terrainMat = new THREE.MeshStandardMaterial({
-      color: 0x1e0b09,
+      color: 0x0f172a,
       wireframe: true,
-      roughness: 0.6,
-      metalness: 0.2,
+      roughness: 0.5,
+      metalness: 0.4,
     });
     const terrain = new THREE.Mesh(terrainGeo, terrainMat);
     terrain.position.set(0, -1, 0);
     scene.add(terrain);
 
-    // 4. Floating Luxury Geometric Crystals (representing Soil Health Factors)
+    // 4. Floating 3D Nutrient Crystals
     const crystalGroup = new THREE.Group();
 
-    // Terracotta Icosahedron (pH Balance)
-    const phGeo = new THREE.IcosahedronGeometry(0.7, 0);
+    // Emerald Icosahedron (pH)
+    const phGeo = new THREE.IcosahedronGeometry(0.75, 0);
     const phMat = new THREE.MeshStandardMaterial({
-      color: 0xb02310,
-      roughness: 0.2,
-      metalness: 0.6,
-      wireframe: false
+      color: 0x10b981,
+      emissive: 0x059669,
+      emissiveIntensity: 0.6,
+      roughness: 0.1,
+      metalness: 0.8
     });
     const phMesh = new THREE.Mesh(phGeo, phMat);
     phMesh.position.set(-3.2, 1.8, 0);
     crystalGroup.add(phMesh);
 
-    // Steel Blue Octahedron (Nitrogen)
-    const nGeo = new THREE.OctahedronGeometry(0.65, 0);
+    // Electric Cyan Octahedron (Nitrogen)
+    const nGeo = new THREE.OctahedronGeometry(0.7, 0);
     const nMat = new THREE.MeshStandardMaterial({
-      color: 0x396a94,
-      roughness: 0.2,
-      metalness: 0.7,
+      color: 0x06b6d4,
+      emissive: 0x0891b2,
+      emissiveIntensity: 0.6,
+      roughness: 0.1,
+      metalness: 0.8
     });
     const nMesh = new THREE.Mesh(nGeo, nMat);
-    nMesh.position.set(-1, 2.5, 1);
+    nMesh.position.set(-1, 2.6, 1);
     crystalGroup.add(nMesh);
 
-    // Architectural Emerald Dodecahedron (Phosphorus)
-    const pGeo = new THREE.DodecahedronGeometry(0.6, 0);
+    // Purple Dodecahedron (Phosphorus)
+    const pGeo = new THREE.DodecahedronGeometry(0.65, 0);
     const pMat = new THREE.MeshStandardMaterial({
-      color: 0x047857,
-      roughness: 0.3,
-      metalness: 0.5,
+      color: 0x8b5cf6,
+      emissive: 0x7c3aed,
+      emissiveIntensity: 0.6,
+      roughness: 0.2,
+      metalness: 0.7
     });
     const pMesh = new THREE.Mesh(pGeo, pMat);
     pMesh.position.set(1.4, 2.0, -0.6);
     crystalGroup.add(pMesh);
 
     // Amber Gold Crystal (Potassium)
-    const kGeo = new THREE.TetrahedronGeometry(0.75, 0);
+    const kGeo = new THREE.TetrahedronGeometry(0.8, 0);
     const kMat = new THREE.MeshStandardMaterial({
-      color: 0xd97706,
-      roughness: 0.2,
-      metalness: 0.8,
+      color: 0xf59e0b,
+      emissive: 0xd97706,
+      emissiveIntensity: 0.6,
+      roughness: 0.1,
+      metalness: 0.8
     });
     const kMesh = new THREE.Mesh(kGeo, kMat);
     kMesh.position.set(3.4, 1.4, 0.6);
@@ -111,8 +118,8 @@ export const Soil3DCanvas: React.FC<Soil3DCanvasProps> = ({ className = '', heig
 
     scene.add(crystalGroup);
 
-    // 5. Floating Dust / Agro Particles
-    const particleCount = 70;
+    // 5. Ambient Micro-Nutrient Particles
+    const particleCount = 80;
     const particleGeo = new THREE.BufferGeometry();
     const particlePositions = new Float32Array(particleCount * 3);
 
@@ -124,15 +131,15 @@ export const Soil3DCanvas: React.FC<Soil3DCanvasProps> = ({ className = '', heig
     particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
 
     const particleMat = new THREE.PointsMaterial({
-      color: 0xb02310,
+      color: 0x10b981,
       size: 0.08,
       transparent: true,
-      opacity: 0.6
+      opacity: 0.7
     });
     const particles = new THREE.Points(particleGeo, particleMat);
     scene.add(particles);
 
-    // 6. Interactive Mouse Movement
+    // 6. Mouse Interaction
     let mouseX = 0;
     let mouseY = 0;
     let targetX = 0;
@@ -159,24 +166,23 @@ export const Soil3DCanvas: React.FC<Soil3DCanvasProps> = ({ className = '', heig
       terrain.rotation.z = targetX * 0.12;
       terrain.rotation.x = -Math.PI / 2 + targetY * 0.1;
 
-      // Crystals rotate and float elegantly
-      phMesh.rotation.x += 0.01;
-      phMesh.rotation.y += 0.015;
+      phMesh.rotation.x += 0.012;
+      phMesh.rotation.y += 0.018;
       phMesh.position.y = 1.8 + Math.sin(elapsedTime * 1.6) * 0.25;
 
       nMesh.rotation.y += 0.02;
-      nMesh.rotation.z += 0.01;
-      nMesh.position.y = 2.5 + Math.cos(elapsedTime * 1.8) * 0.3;
+      nMesh.rotation.z += 0.015;
+      nMesh.position.y = 2.6 + Math.cos(elapsedTime * 1.8) * 0.3;
 
       pMesh.rotation.x += 0.015;
       pMesh.position.y = 2.0 + Math.sin(elapsedTime * 1.3 + 1) * 0.25;
 
-      kMesh.rotation.y += 0.02;
-      kMesh.rotation.x += 0.01;
+      kMesh.rotation.y += 0.022;
+      kMesh.rotation.x += 0.015;
       kMesh.position.y = 1.4 + Math.cos(elapsedTime * 1.5 + 2) * 0.3;
 
-      crystalGroup.rotation.y = elapsedTime * 0.15 + targetX * 0.3;
-      particles.rotation.y = elapsedTime * 0.04;
+      crystalGroup.rotation.y = elapsedTime * 0.18 + targetX * 0.3;
+      particles.rotation.y = elapsedTime * 0.05;
 
       renderer.render(scene, camera);
     };

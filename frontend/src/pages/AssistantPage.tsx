@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import { api } from '../services/api';
+import { Card3D } from '../components/Card3D';
 
 interface Message {
   sender: 'user' | 'assistant';
@@ -33,8 +34,8 @@ export const AssistantPage: React.FC = () => {
         ? 'नमस्कार! मी तुमचा स्मार्ट सॉईल कृषी सहाय्यक आहे. तुमच्या शेताच्या माती परीक्षणानुसार (सामू ६.८) खत व्यवस्थापन, पीक नियोजन किंवा सेंद्रिय उपायांबाबत प्रश्न विचारा.'
         : language === 'hi'
         ? 'नमस्ते! मैं आपका स्मार्ट सॉयल कृषि सहायक हूँ। अपनी मिट्टी जांच (pH 6.8) के आधार पर उर्वरक प्रबंधन या फसल सलाह के बारे में पूछें।'
-        : 'Welcome! I am your Smart Soil AI Agronomic Assistant. Ask any question regarding soil pH management, fertilizer dosing precautions, or crop care.',
-      sources: ['ICAR-IISS Bhopal', 'MPKV Rahuri Package of Practices']
+        : 'Welcome! I am your Smart Soil AI Agronomic Assistant. Ask any question regarding soil pH management, fertilizer precautions, or crop care for your field.',
+      sources: ['ICAR-IISS Bhopal Soil Bulletin', 'MPKV Rahuri Package of Practices']
     }
   ]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -68,7 +69,6 @@ export const AssistantPage: React.FC = () => {
     }
   };
 
-  // Speech Recognition handler
   const handleToggleVoiceInput = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -103,131 +103,127 @@ export const AssistantPage: React.FC = () => {
     }
   };
 
-  const sampleQuestions = language === 'mr' ? [
-    'सामू (pH) कसा सुधारावा?',
-    'सोयाबीन पिकासाठी खत नियोजन काय आहे?',
-    'नत्राची कमतरता कशी ओळखावी?'
-  ] : language === 'hi' ? [
-    'मिट्टी का pH कैसे संतुलित करें?',
-    'सोयाबीन के लिए उर्वरक प्रबंधन क्या है?',
-    'नाइट्रोजन की कमी के लक्षण क्या हैं?'
-  ] : [
-    'How to balance alkaline soil?',
-    'Recommended fertilizer schedule for Soybean?',
-    'How to fix nitrogen deficiency?'
-  ];
-
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-20 pt-4 px-4">
-      {/* Header */}
-      <div className="bg-[#FFFDF8] border border-[#D9D7D0] rounded-3xl p-6 shadow-soft flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-[#181818] text-emerald-400 flex items-center justify-center shadow">
-            <Bot className="w-5 h-5" />
+    <div className="max-w-4xl mx-auto space-y-8 pb-24 pt-6 px-4 sm:px-8">
+      
+      {/* 1. Header Banner */}
+      <div className="relative rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 p-8 sm:p-10 text-white shadow-xl border border-slate-800 overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div className="space-y-2 z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-black uppercase tracking-wider">
+            <Sparkles className="w-4 h-4 text-emerald-400" />
+            AI Agronomy Specialist &bull; Voice Enabled
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-[#1B1B1B]">
-              {language === 'mr' ? 'स्मार्ट कृषी AI सल्लागार' : 'Smart Soil AI Agronomic Assistant'}
-            </h1>
-            <p className="text-xs text-muted">
-              Grounded in ICAR Package of Practices • Speaks Marathi, Hindi & English
-            </p>
-          </div>
+          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            {language === 'mr' ? 'स्मार्ट कृषी सल्लागार' : 'AI Soil Assistant'}
+          </h1>
+          <p className="text-sm sm:text-base text-slate-300 font-medium">
+            Trained on ICAR research and regional agricultural university practices
+          </p>
         </div>
 
-        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800">
-          Grounded Mode Active
-        </span>
+        <div className="z-10 bg-white/10 backdrop-blur-md border border-white/20 px-5 py-2.5 rounded-2xl text-xs font-black text-white">
+          Context: <span className="text-emerald-400">{selectedPlot?.label}</span> (pH 6.8)
+        </div>
       </div>
 
-      {/* Suggested Quick Questions */}
-      <div className="flex flex-wrap gap-2 text-xs">
-        {sampleQuestions.map((q, idx) => (
+      {/* 2. Quick Suggestion Pills */}
+      <div className="flex flex-wrap gap-2">
+        {[
+          { label: 'मातीचा सामू सुधारण्यासाठी काय करावे?', en: 'How to manage soil pH 6.8?' },
+          { label: 'सोयाबीनसाठी खतांची मात्रा कशी ठरवावी?', en: 'Balanced fertilizer for Soybean?' },
+          { label: 'सेंद्रिय खत व्यवस्थापन कसे करावे?', en: 'Organic manure dosage per acre?' }
+        ].map((item, idx) => (
           <button
             key={idx}
-            onClick={() => handleSend(q)}
-            className="bg-white border border-[#D9D7D0] hover:border-black text-[#1B1B1B] px-3.5 py-1.5 rounded-full shadow-sm transition-all text-xs font-medium"
+            onClick={() => handleSend(language === 'mr' ? item.label : item.en)}
+            className="px-4 py-2 rounded-full bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-800 transition-all shadow-sm"
           >
-            {q}
+            {language === 'mr' ? item.label : item.en}
           </button>
         ))}
       </div>
 
-      {/* Messages Container */}
-      <div className="bg-[#FFFDF8] border border-[#D9D7D0] rounded-3xl p-6 shadow-soft min-h-[380px] max-h-[520px] overflow-y-auto space-y-4">
-        {messages.map((m, idx) => (
-          <div
-            key={idx}
-            className={`flex flex-col ${m.sender === 'user' ? 'items-end' : 'items-start'}`}
-          >
+      {/* 3. Chat Messages Container */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xl space-y-6 min-h-[400px] flex flex-col justify-between">
+        <div className="space-y-4 overflow-y-auto max-h-[500px] pr-2">
+          {messages.map((m, idx) => (
             <div
-              className={`max-w-[85%] rounded-2xl p-4 text-xs leading-relaxed space-y-2 ${
-                m.sender === 'user'
-                  ? 'bg-[#181818] text-white rounded-br-none shadow-sm'
-                  : 'bg-[#F0EFEB] text-[#1B1B1B] rounded-bl-none border border-[#D9D7D0]'
-              }`}
+              key={idx}
+              className={`flex flex-col ${m.sender === 'user' ? 'items-end' : 'items-start'}`}
             >
-              <div className="whitespace-pre-wrap">{m.text}</div>
+              <div
+                className={`max-w-[85%] sm:max-w-[75%] rounded-3xl p-5 text-sm sm:text-base font-medium leading-relaxed ${
+                  m.sender === 'user'
+                    ? 'btn-3d-emerald text-white rounded-tr-none'
+                    : 'bg-slate-50 border border-slate-200 text-slate-900 rounded-tl-none shadow-sm'
+                }`}
+              >
+                {m.text}
 
-              {m.sources && m.sources.length > 0 && (
-                <div className="mt-2 pt-2 border-t border-line/60 text-[10px] text-muted">
-                  <strong>Vetted Sources:</strong> {m.sources.join(', ')}
-                </div>
-              )}
+                {/* Sources & Speech for Assistant */}
+                {m.sender === 'assistant' && (
+                  <div className="mt-4 pt-3 border-t border-slate-200/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <div className="flex items-center gap-1.5 text-slate-500 font-semibold">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                      <span>{m.sources?.join(', ') || 'ICAR Guidelines'}</span>
+                    </div>
 
-              {m.sender === 'assistant' && (
-                <div className="flex items-center justify-between pt-1">
-                  <span className="text-[10px] text-muted">Provenance: Generated (Grounded)</span>
-                  <button
-                    onClick={() => handleSpeak(m.text)}
-                    className="p-1 hover:bg-black/10 rounded-full"
-                    title="Speak text"
-                  >
-                    <Volume2 className="w-3.5 h-3.5 text-muted hover:text-black" />
-                  </button>
-                </div>
-              )}
+                    <button
+                      onClick={() => handleSpeak(m.text)}
+                      className="text-emerald-700 hover:text-emerald-900 font-black flex items-center gap-1"
+                    >
+                      <Volume2 className="w-4 h-4" />
+                      <span>Speak</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-        {loading && (
-          <div className="flex items-center gap-2 text-xs text-muted">
-            <span className="w-2 h-2 rounded-full bg-emerald-600 animate-ping"></span>
-            Consulting agronomic knowledge base...
-          </div>
-        )}
-      </div>
+          ))}
 
-      {/* Input Bar */}
-      <div className="flex items-center gap-2">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder={language === 'mr' ? 'माती किंवा पिकाबाबत प्रश्न विचारा...' : 'Ask your soil or farming question...'}
-          className="flex-1 bg-white border border-[#D9D7D0] rounded-full px-5 py-3.5 text-xs text-[#1B1B1B] focus:outline-none focus:border-black shadow-soft"
-        />
+          {loading && (
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-400 p-3">
+              <Sparkles className="w-4 h-4 text-emerald-500 animate-spin" />
+              <span>Analyzing soil parameters and agronomic guidelines...</span>
+            </div>
+          )}
+        </div>
 
-        <button
-          onClick={handleToggleVoiceInput}
-          className={`p-3.5 rounded-full transition-all ${
-            isListening
-              ? 'bg-red-600 text-white animate-pulse'
-              : 'bg-white border border-[#D9D7D0] text-[#1B1B1B] hover:bg-gray-100'
-          }`}
-          title="Voice input"
-        >
-          {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-        </button>
+        {/* Input Bar */}
+        <div className="pt-4 border-t border-slate-200 flex items-center gap-3">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            placeholder={
+              language === 'mr'
+                ? 'येथे प्रश्न विचारा किंवा बोला...'
+                : 'Ask a soil or crop question...'
+            }
+            className="flex-1 bg-slate-50 border border-slate-300 rounded-full px-5 py-3.5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          />
 
-        <button
-          onClick={() => handleSend()}
-          disabled={!input.trim()}
-          className="bg-[#181818] hover:bg-black disabled:opacity-40 text-white p-3.5 rounded-full shadow-float"
-        >
-          <Send className="w-4 h-4 text-emerald-400" />
-        </button>
+          <button
+            onClick={handleToggleVoiceInput}
+            className={`p-3.5 rounded-full transition-all ${
+              isListening
+                ? 'bg-red-500 text-white animate-ping'
+                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+            }`}
+          >
+            {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+          </button>
+
+          <button
+            onClick={() => handleSend()}
+            disabled={!input.trim()}
+            className="btn-3d-emerald px-6 py-3.5 text-xs font-black flex items-center gap-2 disabled:opacity-40"
+          >
+            <span>Ask</span>
+            <Send className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
     </div>

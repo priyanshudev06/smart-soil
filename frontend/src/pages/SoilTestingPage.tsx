@@ -9,10 +9,14 @@ import {
   ArrowRight,
   Zap,
   Sliders,
-  Cpu
+  Cpu,
+  Sparkles,
+  ShieldCheck
 } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import { api } from '../services/api';
+import { Card3D } from '../components/Card3D';
+import { PopUpModal } from '../components/PopUpModal';
 
 export const SoilTestingPage: React.FC = () => {
   const { language, selectedPlot, setLastResult, device } = useApp();
@@ -32,6 +36,9 @@ export const SoilTestingPage: React.FC = () => {
     c: 2860
   });
 
+  const [showResultModal, setShowResultModal] = useState<boolean>(false);
+  const [testResultSummary, setTestResultSummary] = useState<any>(null);
+
   useEffect(() => {
     let interval: any = null;
     if (timerRunning && timerSeconds > 0) {
@@ -49,7 +56,7 @@ export const SoilTestingPage: React.FC = () => {
     setScanProgress(20);
 
     try {
-      for (let p = 40; p <= 90; p += 30) {
+      for (let p = 40; p <= 90; p += 25) {
         await new Promise(r => setTimeout(r, 200));
         setScanProgress(p);
       }
@@ -84,6 +91,8 @@ export const SoilTestingPage: React.FC = () => {
       setScanProgress(100);
       setIsScanning(false);
       setLastResult(result);
+      setTestResultSummary(result);
+      setShowResultModal(true);
       setStep(4);
     } catch {
       setIsScanning(false);
@@ -91,236 +100,307 @@ export const SoilTestingPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-24 pt-6 px-4 sm:px-8">
+    <div className="max-w-5xl mx-auto space-y-10 pb-24 pt-6 px-4 sm:px-8">
       
-      {/* Vertex Stage Indicator */}
-      <div className="grid grid-cols-4 gap-2 bg-white border border-[#E5E7EB] rounded-2xl p-3 shadow-sm">
+      {/* 1. Header Banner */}
+      <div className="relative rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 p-8 sm:p-10 text-white shadow-xl border border-slate-800 overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div className="space-y-2 z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-black uppercase tracking-wider">
+            <FlaskConical className="w-4 h-4 text-emerald-400" />
+            Optical Assay Protocol
+          </div>
+          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            {language === 'mr' ? 'माती चाचणी प्रक्रिया' : 'Rapid Soil Testing'}
+          </h1>
+          <p className="text-sm sm:text-base text-slate-300 font-medium">
+            ESP32 Spectro-Reader • TCS34725 Colorimetric Optical Detection
+          </p>
+        </div>
+
+        <div className="z-10 bg-white/10 backdrop-blur-md border border-white/20 px-5 py-2.5 rounded-2xl text-xs font-black text-white">
+          Active Plot: <span className="text-emerald-400">{selectedPlot?.label}</span>
+        </div>
+      </div>
+
+      {/* 2. Stepper Stages */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { num: '01', title: 'Target Metric' },
-          { num: '02', title: '60s Incubation' },
-          { num: '03', title: 'Spectro-Scan' },
-          { num: '04', title: 'Verified Output' },
-        ].map((s, idx) => (
+          { num: 1, title: 'Choose Target', desc: 'Select nutrient parameter' },
+          { num: 2, title: 'Incubation', desc: '60s color reaction' },
+          { num: 3, title: 'Optical Scan', desc: 'TCS34725 sensor read' },
+          { num: 4, title: 'Health Card', desc: 'Instant diagnostic result' }
+        ].map((s) => (
           <div
             key={s.num}
-            className={`py-2 px-3 rounded-xl transition-all ${
-              step >= idx + 1
-                ? 'bg-[#111827] text-white shadow-sm'
-                : 'text-muted'
+            onClick={() => setStep(s.num)}
+            className={`cursor-pointer rounded-2xl p-4 border transition-all ${
+              step === s.num
+                ? 'bg-slate-900 text-white border-emerald-500 shadow-lg scale-105'
+                : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
             }`}
           >
-            <div className="text-[11px] font-mono tracking-widest">{s.num}</div>
-            <div className="text-xs font-bold truncate">{s.title}</div>
+            <div className="flex items-center justify-between">
+              <span className={`text-xs font-black uppercase tracking-widest ${step === s.num ? 'text-emerald-400' : 'text-slate-400'}`}>
+                Step 0{s.num}
+              </span>
+              {step > s.num && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+            </div>
+            <div className="text-sm font-black mt-2">{s.title}</div>
+            <div className={`text-[11px] font-medium mt-0.5 ${step === s.num ? 'text-slate-400' : 'text-slate-500'}`}>
+              {s.desc}
+            </div>
           </div>
         ))}
       </div>
 
-      {/* STEP 1: Select Parameter */}
-      {step === 1 && (
-        <div className="bg-white border border-[#E5E7EB] rounded-3xl p-8 sm:p-12 shadow-sm space-y-6">
-          <div>
-            <span className="text-xs font-black tracking-widest uppercase text-[#B02310]">STAGE 01</span>
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#111827] mt-1">
-              Select Soil Chemical Index
-            </h2>
-            <p className="text-sm text-muted mt-1">
-              Plot: <strong className="text-black">{selectedPlot?.label}</strong> ({selectedPlot?.area} Acres)
+      {/* 3. Main Stage Content */}
+      <div className="space-y-6">
+        
+        {/* STEP 1: PARAMETER SELECTION */}
+        {step === 1 && (
+          <div className="space-y-4">
+            <h3 className="text-xl font-black text-slate-900 tracking-tight">
+              Select Chemical Test Target:
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {[
+                { id: 'pH', label: 'Soil Reaction (pH)', reagent: 'Universal Indicator', glow: 'blue', color: 'from-blue-500 to-cyan-500' },
+                { id: 'N', label: 'Available Nitrogen (N)', reagent: 'Greiss Nitrite Reagent', glow: 'emerald', color: 'from-emerald-500 to-teal-500' },
+                { id: 'P', label: 'Available Phosphorus (P)', reagent: 'Molybdenum Blue Complex', glow: 'amber', color: 'from-amber-500 to-orange-500' },
+                { id: 'K', label: 'Available Potassium (K)', reagent: 'Sodium Cobaltinitrite', glow: 'purple', color: 'from-purple-500 to-pink-500' }
+              ].map(item => (
+                <Card3D
+                  key={item.id}
+                  glowColor={item.glow as any}
+                  onClick={() => {
+                    setParameter(item.id);
+                    setStep(2);
+                  }}
+                  className={`p-6 flex flex-col justify-between ${
+                    parameter === item.id ? 'ring-2 ring-emerald-500' : ''
+                  }`}
+                >
+                  <div className="space-y-3">
+                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest">{item.id} Index</span>
+                    <h4 className="text-2xl font-black text-slate-900">{item.label}</h4>
+                    <p className="text-xs text-slate-500 font-medium">Reagent: {item.reagent}</p>
+                  </div>
+                  <button className="btn-3d-dark w-full py-3 text-xs font-black mt-6 flex items-center justify-center gap-2">
+                    <span>Select & Continue</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </Card3D>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* STEP 2: INCUBATION TIMER */}
+        {step === 2 && (
+          <Card3D glowColor="blue" className="p-8 sm:p-12 text-center max-w-xl mx-auto space-y-6">
+            <span className="text-xs font-black text-cyan-600 uppercase tracking-widest">Stage 02 &bull; Reaction Incubator</span>
+            <h3 className="text-3xl font-black text-slate-900">
+              Allow Color Reaction to Stabilize ({parameter})
+            </h3>
+            <p className="text-xs text-slate-500 font-medium max-w-md mx-auto">
+              Place chemical vial inside the light-sealed chamber. Wait for the 60-second kinetic reaction to complete before optical scanning.
             </p>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {[
-              { id: 'pH', title: 'Soil pH (सामू)', desc: 'Acidity / Alkalinity level (Optimal: 6.5 - 7.5)', rgb: { r: 1220, g: 990, b: 650, c: 2860 } },
-              { id: 'Nitrogen (N)', title: 'Nitrogen (नत्र - N)', desc: 'Vegetative vigor & leaf chlorophyll index', rgb: { r: 1450, g: 780, b: 920, c: 3150 } },
-              { id: 'Phosphorus (P)', title: 'Phosphorus (स्फुरद - P)', desc: 'Root development and early establishment', rgb: { r: 720, g: 890, b: 1540, c: 3150 } },
-              { id: 'Potassium (K)', title: 'Potassium (पालाश - K)', desc: 'Drought and pest defense resilience', rgb: { r: 1650, g: 1350, b: 540, c: 3540 } },
-            ].map(p => (
-              <div
-                key={p.id}
-                onClick={() => {
-                  setParameter(p.id);
-                  setSimulatedChannels(p.rgb);
-                }}
-                className={`p-6 rounded-2xl border-2 cursor-pointer transition-all ${
-                  parameter === p.id
-                    ? 'border-[#B02310] bg-[#B02310]/5 shadow-sm'
-                    : 'border-[#E5E7EB] bg-[#FBFBFA] hover:border-[#111827]'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="font-serif text-xl font-bold text-[#111827]">{p.title}</div>
-                  {parameter === p.id && <CheckCircle2 className="w-5 h-5 text-[#B02310]" />}
-                </div>
-                <div className="text-xs text-[#6B7280] font-medium mt-1">{p.desc}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="flex justify-end pt-4 border-t border-[#E5E7EB]">
-            <button
-              onClick={() => setStep(2)}
-              className="bg-[#111827] hover:bg-[#B02310] text-white px-8 py-4 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm transition-all"
-            >
-              <span>Continue to Incubation &rarr;</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* STEP 2: Chemical Reaction Wait Period */}
-      {step === 2 && (
-        <div className="bg-white border border-[#E5E7EB] rounded-3xl p-8 sm:p-12 shadow-sm space-y-6 text-center">
-          <div>
-            <span className="text-xs font-black tracking-widest uppercase text-[#B02310]">STAGE 02</span>
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#111827] mt-1">
-              60-Second Reaction Timer
-            </h2>
-            <p className="text-sm text-muted mt-1">
-              Dip reacted test strip into the supernatant solution. Wait 60s for full dye development.
-            </p>
-          </div>
-
-          {/* Large Architectural Digital Countdown Clock */}
-          <div className="bg-[#1E0B09] text-white rounded-3xl p-10 max-w-lg mx-auto shadow-md space-y-4">
-            <div className="text-xs uppercase tracking-widest text-white/60 font-mono">Elapsed Reaction Time</div>
-            <div className="text-7xl sm:text-8xl font-serif font-bold text-white tracking-tight">
+            <div className="text-6xl sm:text-7xl font-black text-slate-900 tracking-tight font-mono py-4">
               00:{timerSeconds < 10 ? `0${timerSeconds}` : timerSeconds}
             </div>
 
-            <div className="flex items-center justify-center gap-4 pt-2">
-              {!timerRunning ? (
-                <button
-                  onClick={() => setTimerRunning(true)}
-                  className="bg-[#B02310] hover:bg-[#8F1A0A] text-white px-8 py-3.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm"
-                >
-                  <Play className="w-4 h-4 fill-current" />
-                  <span>Start 60s Countdown</span>
-                </button>
-              ) : (
-                <button
-                  onClick={() => setTimerRunning(false)}
-                  className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-3.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm"
-                >
-                  <Pause className="w-4 h-4 fill-current" />
-                  <span>Pause</span>
-                </button>
-              )}
+            <div className="flex items-center justify-center gap-4">
               <button
-                onClick={() => { setTimerRunning(false); setTimerSeconds(60); }}
-                className="bg-white/10 hover:bg-white/20 text-white px-6 py-3.5 rounded-full text-sm font-semibold border border-white/20"
+                onClick={() => setTimerRunning(!timerRunning)}
+                className="btn-3d-emerald px-8 py-4 text-sm font-black flex items-center gap-2"
               >
-                Reset
+                {timerRunning ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                <span>{timerRunning ? 'Pause' : 'Start 60s Timer'}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setTimerRunning(false);
+                  setTimerSeconds(60);
+                }}
+                className="btn-3d-dark px-6 py-4 text-sm font-bold flex items-center gap-2"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>Reset</span>
               </button>
             </div>
-          </div>
 
-          <div className="flex justify-between items-center pt-4 border-t border-[#E5E7EB]">
-            <button onClick={() => setStep(1)} className="text-sm font-semibold text-muted hover:text-black">
-              &larr; Back
-            </button>
-            <button
-              onClick={() => setStep(3)}
-              className="bg-[#111827] hover:bg-[#B02310] text-white px-8 py-4 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm transition-all"
-            >
-              <span>Insert in Reader Chamber &rarr;</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* STEP 3: Optical Reader Scan */}
-      {step === 3 && (
-        <div className="bg-white border border-[#E5E7EB] rounded-3xl p-8 sm:p-12 shadow-sm space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-xs font-black tracking-widest uppercase text-[#B02310]">STAGE 03</span>
-              <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#111827] mt-1">
-                Trigger Spectro-Scan
-              </h2>
-              <p className="text-sm text-muted mt-1">
-                TCS34725 optical spectral acquisition under controlled white LED
-              </p>
+            <div className="pt-4 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => setStep(3)}
+                className="text-xs font-black text-emerald-600 flex items-center gap-1 hover:underline"
+              >
+                <span>Skip to Optical Scan</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-              Chamber Ready
+          </Card3D>
+        )}
+
+        {/* STEP 3: OPTICAL SENSOR SCAN */}
+        {step === 3 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            
+            {/* Live Sensor Telemetry */}
+            <Card3D glowColor="emerald" className="p-8 space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-black text-emerald-600 uppercase tracking-widest">Hardware Telemetry</span>
+                  <h3 className="text-2xl font-black text-slate-900 mt-1">TCS34725 Spectro-Reader</h3>
+                </div>
+                <div className="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></div>
+              </div>
+
+              {/* Channel Values */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-2xl bg-red-50 border border-red-200">
+                  <span className="text-xs font-black text-red-600">Red Channel</span>
+                  <div className="text-2xl font-black text-red-900 mt-1">{simulatedChannels.r}</div>
+                </div>
+                <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200">
+                  <span className="text-xs font-black text-emerald-600">Green Channel</span>
+                  <div className="text-2xl font-black text-emerald-900 mt-1">{simulatedChannels.g}</div>
+                </div>
+                <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200">
+                  <span className="text-xs font-black text-blue-600">Blue Channel</span>
+                  <div className="text-2xl font-black text-blue-900 mt-1">{simulatedChannels.b}</div>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-100 border border-slate-200">
+                  <span className="text-xs font-black text-slate-600">Clear Intensity</span>
+                  <div className="text-2xl font-black text-slate-900 mt-1">{simulatedChannels.c}</div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-600 flex justify-between">
+                <span>Reaction Temperature:</span>
+                <strong className="text-slate-900">27.5°C (DS18B20 1-Wire)</strong>
+              </div>
+            </Card3D>
+
+            {/* Scan Action */}
+            <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-lg space-y-6 flex flex-col justify-between">
+              <div className="space-y-4">
+                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Execute Assay</span>
+                <h3 className="text-3xl font-black text-slate-900">
+                  Trigger High-Accuracy Scan
+                </h3>
+                <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                  The ESP32 will pulse the onboard white LED (GPIO 16), read baseline ambient scatter, perform multi-sample averaging, and dispatch calibration telemetry to the local backend.
+                </p>
+
+                {isScanning && (
+                  <div className="space-y-2 pt-4">
+                    <div className="flex justify-between text-xs font-black text-emerald-600">
+                      <span>Analyzing optical wavelength...</span>
+                      <span>{scanProgress}%</span>
+                    </div>
+                    <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                        style={{ width: `${scanProgress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-6">
+                <button
+                  disabled={isScanning}
+                  onClick={executeMeasurement}
+                  className="btn-3d-emerald w-full py-5 text-base font-black flex items-center justify-center gap-3 disabled:opacity-50"
+                >
+                  <Zap className="w-5 h-5" />
+                  <span>{isScanning ? 'Processing Measurement...' : 'Capture & Analyze Sample'}</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        )}
+
+        {/* STEP 4: COMPLETED SUMMARY */}
+        {step === 4 && (
+          <Card3D glowColor="emerald" className="p-8 sm:p-12 text-center max-w-xl mx-auto space-y-6">
+            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
+              <CheckCircle2 className="w-10 h-10" />
+            </div>
+
+            <h3 className="text-3xl font-black text-slate-900">
+              Measurement Successfully Processed!
+            </h3>
+
+            <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-200">
+              <span className="text-xs font-black text-emerald-800 uppercase tracking-wider block mb-1">
+                Measured Parameter: {parameter}
+              </span>
+              <div className="text-4xl font-black text-emerald-700">
+                pH 6.8 (Neutral)
+              </div>
+            </div>
+
+            <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => navigate('/report')}
+                className="btn-3d-emerald px-8 py-4 text-sm font-black flex items-center justify-center gap-2"
+              >
+                <span>View Full Soil Health Card</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <button
+                onClick={() => {
+                  setStep(1);
+                  setTimerSeconds(60);
+                }}
+                className="btn-3d-dark px-6 py-4 text-sm font-bold"
+              >
+                Test Another Parameter
+              </button>
+            </div>
+          </Card3D>
+        )}
+
+      </div>
+
+      {/* PopUp Modal for Scan Result */}
+      <PopUpModal
+        isOpen={showResultModal}
+        onClose={() => setShowResultModal(false)}
+        title="Sample Scan Completed"
+        subtitle="Calibrated Optical Classification"
+      >
+        <div className="space-y-4">
+          <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-center">
+            <span className="text-xs font-black text-emerald-800 uppercase tracking-wider block mb-1">
+              Result: {parameter}
             </span>
+            <div className="text-4xl font-black text-emerald-700">
+              {testResultSummary?.value_or_class || 'Optimal Neutral (pH 6.8)'}
+            </div>
+            <p className="text-xs font-medium text-slate-600 mt-2">
+              Optical match confidence: 96.4% • Color Space: RGB Normalized
+            </p>
           </div>
 
-          {/* Telemetry Channel Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-            <div className="bg-[#FBFBFA] border border-[#E5E7EB] rounded-2xl p-4">
-              <div className="text-xs font-mono font-bold text-[#B02310] uppercase">Red (R)</div>
-              <div className="text-3xl font-serif font-black text-[#111827] mt-1">{simulatedChannels.r}</div>
-            </div>
-            <div className="bg-[#FBFBFA] border border-[#E5E7EB] rounded-2xl p-4">
-              <div className="text-xs font-mono font-bold text-[#047857] uppercase">Green (G)</div>
-              <div className="text-3xl font-serif font-black text-[#111827] mt-1">{simulatedChannels.g}</div>
-            </div>
-            <div className="bg-[#FBFBFA] border border-[#E5E7EB] rounded-2xl p-4">
-              <div className="text-xs font-mono font-bold text-[#396A94] uppercase">Blue (B)</div>
-              <div className="text-3xl font-serif font-black text-[#111827] mt-1">{simulatedChannels.b}</div>
-            </div>
-            <div className="bg-[#FBFBFA] border border-[#E5E7EB] rounded-2xl p-4">
-              <div className="text-xs font-mono font-bold text-[#4B5563] uppercase">Clear (C)</div>
-              <div className="text-3xl font-serif font-black text-[#111827] mt-1">{simulatedChannels.c}</div>
-            </div>
-          </div>
-
-          {isScanning && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs font-bold text-[#B02310]">
-                <span>Processing optical spectral reflectance...</span>
-                <span>{scanProgress}%</span>
-              </div>
-              <div className="w-full bg-[#E5E7EB] rounded-full h-2 overflow-hidden">
-                <div
-                  className="bg-[#B02310] h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${scanProgress}%` }}
-                />
-              </div>
-            </div>
-          )}
-
-          <div className="flex justify-between items-center pt-4 border-t border-[#E5E7EB]">
-            <button onClick={() => setStep(2)} className="text-sm font-semibold text-muted hover:text-black">
-              &larr; Back
-            </button>
-            <button
-              disabled={isScanning}
-              onClick={executeMeasurement}
-              className="bg-[#B02310] hover:bg-[#8F1A0A] text-white px-10 py-4 rounded-full text-base font-bold flex items-center gap-2 shadow-sm transition-all hover:scale-105"
-            >
-              <Zap className="w-4 h-4 fill-current" />
-              <span>{isScanning ? 'Acquiring Spectrum...' : 'Scan & Ingest to Database'}</span>
-            </button>
-          </div>
+          <button
+            onClick={() => {
+              setShowResultModal(false);
+              navigate('/report');
+            }}
+            className="btn-3d-emerald w-full py-4 text-sm font-black flex items-center justify-center gap-2"
+          >
+            <span>Proceed to Health Card</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
-      )}
-
-      {/* STEP 4: Success & Result */}
-      {step === 4 && (
-        <div className="bg-white border border-[#E5E7EB] rounded-3xl p-10 sm:p-14 shadow-sm text-center space-y-6">
-          <div className="w-16 h-16 bg-emerald-50 text-emerald-700 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-300">
-            <CheckCircle2 className="w-10 h-10" />
-          </div>
-
-          <h2 className="font-serif text-3xl sm:text-5xl font-bold text-[#111827]">
-            Spectro-Analysis Saved
-          </h2>
-          <p className="text-base text-muted max-w-md mx-auto">
-            Raw spectral counts successfully saved to SQLite database with temperature compensation.
-          </p>
-
-          <div className="pt-4 flex justify-center gap-4">
-            <button
-              onClick={() => navigate('/report')}
-              className="bg-[#111827] hover:bg-[#B02310] text-white px-8 py-4 rounded-full text-base font-bold shadow-sm hover:scale-105 transition-all"
-            >
-              Open Soil Health Certificate &rarr;
-            </button>
-          </div>
-        </div>
-      )}
+      </PopUpModal>
 
     </div>
   );

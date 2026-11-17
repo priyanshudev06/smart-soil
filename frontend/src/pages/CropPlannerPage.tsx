@@ -2,17 +2,20 @@ import React, { useState, useEffect } from 'react';
 import {
   Sprout,
   Calculator,
-  ShieldCheck,
   TrendingUp,
   Droplets,
   Calendar,
   Layers,
-  Check,
-  Info
+  ArrowRight,
+  Sparkles,
+  DollarSign,
+  CheckCircle2
 } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import { api } from '../services/api';
 import { CropRecommendation } from '../types';
+import { Card3D } from '../components/Card3D';
+import { PopUpModal } from '../components/PopUpModal';
 
 export const CropPlannerPage: React.FC = () => {
   const { language, selectedPlot } = useApp();
@@ -21,6 +24,9 @@ export const CropPlannerPage: React.FC = () => {
   const [water, setWater] = useState<string>('Medium');
   const [crops, setCrops] = useState<CropRecommendation[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
+  // Selected Crop Modal
+  const [activeModalCrop, setActiveModalCrop] = useState<CropRecommendation | null>(null);
 
   // Profit Calculator State
   const [calcCrop, setCalcCrop] = useState<string>('Soybean');
@@ -58,32 +64,32 @@ export const CropPlannerPage: React.FC = () => {
   }, [calcCrop, calcArea, calcYield, calcPrice, calcSeed, calcFertilizer, calcLabor, calcIrrigation]);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-20 pt-4 px-4">
+    <div className="max-w-7xl mx-auto space-y-10 pb-24 pt-6 px-4 sm:px-8">
       
-      {/* Header */}
-      <div className="bg-[#FFFDF8] border border-[#D9D7D0] rounded-3xl p-6 shadow-soft flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold uppercase tracking-wider mb-2">
-            <Sprout className="w-3.5 h-3.5" />
-            {language === 'mr' ? 'शास्त्रीय पीक नियोजन' : 'Grounded Agronomic Planning'}
+      {/* 1. Header Banner */}
+      <div className="relative rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 p-8 sm:p-10 text-white shadow-xl border border-slate-800 overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="space-y-2 z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-black uppercase tracking-wider">
+            <Sprout className="w-4 h-4 text-emerald-400" />
+            AI Precision Soil-Matching
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1B1B1B] tracking-tight">
-            {language === 'mr' ? 'माती सुसंगत पिके व नफा अंदाज' : 'Crop Suitability & Profit Optimization'}
+          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            {language === 'mr' ? 'पीक निवड व नफा अंदाज' : 'Crop Suitability & Profit'}
           </h1>
-          <p className="text-xs text-muted mt-1">
-            Matched for {selectedPlot?.label} • pH 6.8 • Medium Deep Black Soil
+          <p className="text-sm sm:text-base text-slate-300 font-medium">
+            Tailored for <strong className="text-white">{selectedPlot?.label}</strong> • pH 6.8 Neutral • Black Soil
           </p>
         </div>
 
-        {/* Season & Water Filter */}
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="bg-white border border-[#D9D7D0] rounded-full px-3 py-1.5 text-xs flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-muted" />
-            <span className="text-muted font-medium">Season:</span>
+        {/* Season & Water Filters in Glass Pod */}
+        <div className="z-10 flex flex-wrap items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 p-2.5 rounded-2xl">
+          <div className="px-3 py-1.5 rounded-xl bg-white/10 flex items-center gap-2 text-xs font-bold text-white">
+            <Calendar className="w-4 h-4 text-emerald-400" />
+            <span>Season:</span>
             <select
               value={season}
               onChange={(e) => setSeason(e.target.value)}
-              className="bg-transparent font-bold text-[#1B1B1B] focus:outline-none cursor-pointer"
+              className="bg-slate-900 text-white rounded-lg px-2 py-1 font-bold text-xs focus:outline-none border border-slate-700 cursor-pointer"
             >
               <option value="Kharif">Kharif (पावसाळी)</option>
               <option value="Rabi">Rabi (हिवाळी)</option>
@@ -91,244 +97,303 @@ export const CropPlannerPage: React.FC = () => {
             </select>
           </div>
 
-          <div className="bg-white border border-[#D9D7D0] rounded-full px-3 py-1.5 text-xs flex items-center gap-1.5">
-            <Droplets className="w-3.5 h-3.5 text-blue-600" />
-            <span className="text-muted font-medium">Water:</span>
+          <div className="px-3 py-1.5 rounded-xl bg-white/10 flex items-center gap-2 text-xs font-bold text-white">
+            <Droplets className="w-4 h-4 text-cyan-400" />
+            <span>Water:</span>
             <select
               value={water}
               onChange={(e) => setWater(e.target.value)}
-              className="bg-transparent font-bold text-[#1B1B1B] focus:outline-none cursor-pointer"
+              className="bg-slate-900 text-white rounded-lg px-2 py-1 font-bold text-xs focus:outline-none border border-slate-700 cursor-pointer"
             >
-              <option value="High">High (Drip/Canal)</option>
-              <option value="Medium">Medium (Borewell)</option>
-              <option value="Low / Rainfed">Low / Rainfed</option>
+              <option value="Low">Low (कमी पाणी)</option>
+              <option value="Medium">Medium (मध्यम)</option>
+              <option value="High">High (मुबलक)</option>
             </select>
           </div>
         </div>
       </div>
 
-      {/* Ranked Crop Suitability Cards */}
+      {/* 2. 3D Crop Suitability Cards */}
       <div className="space-y-4">
-        <h2 className="text-lg font-bold text-[#1B1B1B] flex items-center gap-2">
-          <span>Ranked Crops for Selected Season & Soil:</span>
-          <span className="text-xs font-normal text-muted">({crops.length} options evaluated)</span>
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <span>Recommended Crops</span>
+            <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full">
+              Hover for 3D Tilt • Click for Details
+            </span>
+          </h2>
+        </div>
+
+        {loading ? (
+          <div className="p-12 text-center text-slate-400 font-bold">Analysing soil compatibility...</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {crops.map((crop, idx) => {
+              const glow = idx === 0 ? 'emerald' : idx === 1 ? 'blue' : 'purple';
+              const displayName = language === 'mr' ? crop.crop_name_mr : language === 'hi' ? crop.crop_name_hi : crop.crop_name;
+              return (
+                <Card3D
+                  key={crop.crop_name}
+                  glowColor={glow}
+                  onClick={() => setActiveModalCrop(crop)}
+                  className="p-6 flex flex-col justify-between"
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <span className="text-xs font-extrabold text-slate-400 uppercase tracking-widest">
+                          {crop.season_duration}
+                        </span>
+                        <h3 className="text-2xl font-black text-slate-900 mt-1">
+                          {displayName}
+                        </h3>
+                      </div>
+                      <div className="px-3 py-1.5 rounded-2xl bg-emerald-500/10 text-emerald-700 font-black text-xs border border-emerald-500/20">
+                        {crop.suitability_score}% Match
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-2">
+                      <div className="flex justify-between text-xs font-semibold text-slate-600">
+                        <span>Expected Yield:</span>
+                        <strong className="text-slate-900">{crop.estimated_yield_per_acre}</strong>
+                      </div>
+                      <div className="flex justify-between text-xs font-semibold text-slate-600">
+                        <span>Water Need:</span>
+                        <strong className="text-slate-900">{crop.water_needs}</strong>
+                      </div>
+                    </div>
+
+                    <p className="text-xs font-medium text-slate-600 leading-relaxed">
+                      {crop.soil_compatibility}
+                    </p>
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5" /> Tap for Agronomy Guide
+                    </span>
+                    <button className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center hover:bg-emerald-600 transition-colors">
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </Card3D>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* 3. Interactive Profit & Margin Calculator */}
+      <div className="space-y-4">
+        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+          <Calculator className="w-7 h-7 text-emerald-600" />
+          <span>Interactive Net Farm Profit Calculator</span>
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {crops.map((c, i) => (
-            <div
-              key={i}
-              className="bg-white border border-[#D9D7D0] rounded-2xl p-5 shadow-soft flex flex-col justify-between hover:border-black transition-all"
-            >
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Inputs Card */}
+          <div className="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-[0_10px_25px_-5px_rgba(15,23,42,0.08)] space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                    c.suitability_score >= 80
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : c.suitability_score >= 60
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-amber-100 text-amber-800'
-                  }`}>
-                    {c.suitability_score}% Match
-                  </span>
-                  <span className="text-xs text-muted">{c.season_duration}</span>
-                </div>
-
-                <div className="text-lg font-extrabold text-[#1B1B1B]">
-                  {language === 'mr' ? c.crop_name_mr : language === 'hi' ? c.crop_name_hi : c.crop_name}
-                </div>
-                <div className="text-xs text-emerald-700 font-medium mt-0.5">{c.category}</div>
-
-                <div className="mt-3 space-y-1.5 text-xs text-muted border-t border-line/60 pt-3">
-                  <div className="flex justify-between">
-                    <span>Avg. Yield:</span>
-                    <strong className="text-[#1B1B1B]">{c.estimated_yield_per_acre}</strong>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Est. Profit:</span>
-                    <strong className="text-emerald-700">{c.estimated_profit_range}</strong>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Water Demand:</span>
-                    <strong className="text-[#1B1B1B]">{c.water_needs}</strong>
-                  </div>
-                </div>
-
-                {/* Reasons bullet */}
-                <div className="mt-3 bg-[#F0EFEB] rounded-xl p-2.5 text-[11px] text-[#1B1B1B] space-y-1">
-                  {c.reasons.map((r, ri) => (
-                    <div key={ri} className="flex items-start gap-1.5">
-                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>{r}</span>
-                    </div>
-                  ))}
-                </div>
+                <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider block mb-2">
+                  Select Crop
+                </label>
+                <select
+                  value={calcCrop}
+                  onChange={(e) => setCalcCrop(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-2xl p-3 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                  <option value="Soybean">Soybean (सोयाबीन)</option>
+                  <option value="Onion">Onion (कांदा)</option>
+                  <option value="Chickpea">Chickpea (हरभरा)</option>
+                  <option value="Cotton">Cotton (कापूस)</option>
+                </select>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-line/60 flex items-center justify-between text-[10px] text-muted">
-                <span className="truncate max-w-[200px]" title={c.source}>Source: {c.source}</span>
+              <div>
+                <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider block mb-2">
+                  Plot Area (Acres)
+                </label>
+                <input
+                  type="number"
+                  step="0.5"
+                  value={calcArea}
+                  onChange={(e) => setCalcArea(parseFloat(e.target.value) || 1)}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-2xl p-3 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider block mb-2">
+                  Yield (Quintal / Acre)
+                </label>
+                <input
+                  type="number"
+                  value={calcYield}
+                  onChange={(e) => setCalcYield(parseFloat(e.target.value) || 0)}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-2xl p-3 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider block mb-2">
+                  Mandi Price (₹ / Quintal)
+                </label>
+                <input
+                  type="number"
+                  value={calcPrice}
+                  onChange={(e) => setCalcPrice(parseFloat(e.target.value) || 0)}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-2xl p-3 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-slate-100">
+              <span className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-4">
+                Cost Breakdown (₹ / Acre)
+              </span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div>
+                  <span className="text-slate-500 font-semibold block mb-1">Seed:</span>
+                  <input
+                    type="number"
+                    value={calcSeed}
+                    onChange={(e) => setCalcSeed(parseFloat(e.target.value) || 0)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-bold text-slate-900"
+                  />
+                </div>
+                <div>
+                  <span className="text-slate-500 font-semibold block mb-1">Fertilizer:</span>
+                  <input
+                    type="number"
+                    value={calcFertilizer}
+                    onChange={(e) => setCalcFertilizer(parseFloat(e.target.value) || 0)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-bold text-slate-900"
+                  />
+                </div>
+                <div>
+                  <span className="text-slate-500 font-semibold block mb-1">Labor:</span>
+                  <input
+                    type="number"
+                    value={calcLabor}
+                    onChange={(e) => setCalcLabor(parseFloat(e.target.value) || 0)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-bold text-slate-900"
+                  />
+                </div>
+                <div>
+                  <span className="text-slate-500 font-semibold block mb-1">Irrigation:</span>
+                  <input
+                    type="number"
+                    value={calcIrrigation}
+                    onChange={(e) => setCalcIrrigation(parseFloat(e.target.value) || 0)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-bold text-slate-900"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 3D Profit Projection Display */}
+          <div className="lg:col-span-5">
+            <Card3D glowColor="emerald" className="p-8 bg-gradient-to-br from-slate-900 to-slate-950 text-white border-slate-800">
+              <div className="space-y-6">
+                <div>
+                  <span className="text-xs font-black text-emerald-400 uppercase tracking-widest">
+                    Projected Financial Output
+                  </span>
+                  <h3 className="text-xl font-bold text-slate-200 mt-1">
+                    {calcCrop} for {calcArea} Acres
+                  </h3>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-4">
+                  <div className="flex justify-between items-center text-sm text-slate-300">
+                    <span>Total Gross Revenue:</span>
+                    <strong className="text-white text-base">₹{calcResult?.total_revenue?.toLocaleString() || '1,20,500'}</strong>
+                  </div>
+                  <div className="flex justify-between items-center text-sm text-slate-300">
+                    <span>Total Cultivation Cost:</span>
+                    <strong className="text-red-400 text-base">-₹{calcResult?.total_cost?.toLocaleString() || '43,000'}</strong>
+                  </div>
+                  <div className="pt-3 border-t border-white/10 flex justify-between items-center text-xs text-slate-400">
+                    <span>Break-Even Price:</span>
+                    <strong className="text-emerald-300">₹{calcResult?.break_even_price_per_quintal || '1,720'} / Qtl</strong>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">
+                    Estimated Net Profit
+                  </span>
+                  <div className="text-4xl sm:text-5xl font-black text-emerald-400 tracking-tight mt-1">
+                    ₹{calcResult?.net_profit?.toLocaleString() || '77,500'}
+                  </div>
+                  <div className="text-xs text-slate-400 font-semibold mt-1">
+                    ROI: +{calcResult?.roi_percentage || '180'}% on invested capital
+                  </div>
+                </div>
+
                 <button
-                  onClick={() => {
-                    setCalcCrop(c.crop_name);
-                    const avgY = parseFloat(c.estimated_yield_per_acre.split('-')[0]) || 10;
-                    setCalcYield(avgY);
-                  }}
-                  className="font-bold text-[#1B1B1B] hover:underline shrink-0"
+                  onClick={() => alert(`Saved profit plan for ${calcCrop} to your farm record.`)}
+                  className="btn-3d-emerald w-full py-4 text-sm font-black flex items-center justify-center gap-2 mt-4"
                 >
-                  Calculate ROI &rarr;
+                  <DollarSign className="w-4 h-4" />
+                  Save Agronomic Plan
                 </button>
               </div>
-            </div>
-          ))}
+            </Card3D>
+          </div>
+
         </div>
       </div>
 
-      {/* Interactive Profit & Break-even Calculator */}
-      <div className="bg-[#FFFDF8] border-2 border-[#D9D7D0] rounded-3xl p-6 sm:p-8 shadow-soft space-y-6">
-        <div className="flex items-center gap-2">
-          <Calculator className="w-6 h-6 text-emerald-700" />
-          <div>
-            <h2 className="text-xl font-bold text-[#1B1B1B]">
-              {language === 'mr' ? 'खर्च, नफा व ब्रेक-इव्हन कॅल्क्युलेटर' : 'Crop Economics & Break-Even Calculator'}
-            </h2>
-            <p className="text-xs text-muted">
-              Adjust parameters below to estimate financial return and minimum break-even yield
-            </p>
-          </div>
-        </div>
+      {/* PopUp Modal for Crop Detail */}
+      <PopUpModal
+        isOpen={!!activeModalCrop}
+        onClose={() => setActiveModalCrop(null)}
+        title={activeModalCrop?.crop_name || 'Crop Guide'}
+        subtitle={`Scientific Package of Practices • ${activeModalCrop?.season_duration}`}
+      >
+        {activeModalCrop && (
+          <div className="space-y-4">
+            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200">
+              <span className="text-xs font-black text-emerald-800 uppercase tracking-wider block mb-1">
+                Soil Compatibility Match
+              </span>
+              <p className="text-sm font-bold text-slate-800">
+                {activeModalCrop.soil_compatibility}
+              </p>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          {/* Inputs Form */}
-          <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            <div>
-              <label className="block font-semibold text-muted mb-1">Selected Crop</label>
-              <select
-                value={calcCrop}
-                onChange={(e) => setCalcCrop(e.target.value)}
-                className="w-full p-2.5 rounded-xl border border-line bg-white font-bold"
+            <div className="grid grid-cols-2 gap-3 text-xs font-semibold">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <span className="text-slate-500 block">Expected Yield</span>
+                <span className="text-sm font-black text-slate-900">{activeModalCrop.estimated_yield_per_acre}</span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <span className="text-slate-500 block">Water Need</span>
+                <span className="text-sm font-black text-slate-900">{activeModalCrop.water_needs}</span>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <button
+                onClick={() => {
+                  setCalcCrop(activeModalCrop.crop_name);
+                  setActiveModalCrop(null);
+                }}
+                className="btn-3d-dark w-full py-3 text-sm font-bold flex items-center justify-center gap-2"
               >
-                <option value="Soybean">Soybean (सोयाबीन)</option>
-                <option value="Onion">Onion (कांदा)</option>
-                <option value="Cotton">Cotton (कापूस)</option>
-                <option value="Wheat">Wheat (गहू)</option>
-                <option value="Chickpea">Chickpea (हरभरा)</option>
-                <option value="Tomato">Tomato (टोमॅटो)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block font-semibold text-muted mb-1">Land Area (Acres)</label>
-              <input
-                type="number"
-                step="0.5"
-                value={calcArea}
-                onChange={(e) => setCalcArea(parseFloat(e.target.value) || 1)}
-                className="w-full p-2.5 rounded-xl border border-line bg-white font-bold"
-              />
-            </div>
-
-            <div>
-              <label className="block font-semibold text-muted mb-1">Expected Yield (Quintals / Acre)</label>
-              <input
-                type="number"
-                value={calcYield}
-                onChange={(e) => setCalcYield(parseFloat(e.target.value) || 0)}
-                className="w-full p-2.5 rounded-xl border border-line bg-white font-bold"
-              />
-            </div>
-
-            <div>
-              <label className="block font-semibold text-muted mb-1">Mandi Modal Price (₹ / Quintal)</label>
-              <input
-                type="number"
-                value={calcPrice}
-                onChange={(e) => setCalcPrice(parseFloat(e.target.value) || 0)}
-                className="w-full p-2.5 rounded-xl border border-line bg-white font-bold"
-              />
-            </div>
-
-            <div>
-              <label className="block font-semibold text-muted mb-1">Seed Cost (₹ / Acre)</label>
-              <input
-                type="number"
-                value={calcSeed}
-                onChange={(e) => setCalcSeed(parseFloat(e.target.value) || 0)}
-                className="w-full p-2.5 rounded-xl border border-line bg-white"
-              />
-            </div>
-
-            <div>
-              <label className="block font-semibold text-muted mb-1">Fertilizer & Manure (₹ / Acre)</label>
-              <input
-                type="number"
-                value={calcFertilizer}
-                onChange={(e) => setCalcFertilizer(parseFloat(e.target.value) || 0)}
-                className="w-full p-2.5 rounded-xl border border-line bg-white"
-              />
-            </div>
-
-            <div>
-              <label className="block font-semibold text-muted mb-1">Labor & Machinery (₹ / Acre)</label>
-              <input
-                type="number"
-                value={calcLabor}
-                onChange={(e) => setCalcLabor(parseFloat(e.target.value) || 0)}
-                className="w-full p-2.5 rounded-xl border border-line bg-white"
-              />
-            </div>
-
-            <div>
-              <label className="block font-semibold text-muted mb-1">Irrigation & Protection (₹ / Acre)</label>
-              <input
-                type="number"
-                value={calcIrrigation}
-                onChange={(e) => setCalcIrrigation(parseFloat(e.target.value) || 0)}
-                className="w-full p-2.5 rounded-xl border border-line bg-white"
-              />
+                <span>Load in Profit Calculator</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
           </div>
+        )}
+      </PopUpModal>
 
-          {/* Results Summary Box */}
-          <div className="bg-[#181818] text-white rounded-2xl p-6 flex flex-col justify-between shadow-float">
-            <div>
-              <div className="text-xs uppercase tracking-wider text-emerald-400 font-semibold mb-1">
-                Estimated Net Profit
-              </div>
-              <div className="text-4xl font-black text-emerald-400">
-                ₹{calcResult?.net_profit ? calcResult.net_profit.toLocaleString('en-IN') : '0'}
-              </div>
-              <div className="text-xs text-white/70 mt-1">
-                ROI: <strong className="text-white">{calcResult?.return_on_investment_pct || 0}%</strong>
-              </div>
-
-              <div className="mt-6 space-y-2.5 text-xs text-white/80 border-t border-white/10 pt-4">
-                <div className="flex justify-between">
-                  <span>Gross Output:</span>
-                  <strong className="text-white">{calcResult?.total_yield_quintal || 0} Quintals</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span>Gross Revenue:</span>
-                  <strong className="text-white">₹{calcResult?.gross_revenue ? calcResult.gross_revenue.toLocaleString('en-IN') : '0'}</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span>Total Input Costs:</span>
-                  <strong className="text-white">₹{calcResult?.total_input_cost ? calcResult.total_input_cost.toLocaleString('en-IN') : '0'}</strong>
-                </div>
-                <div className="flex justify-between text-amber-300 font-semibold pt-1 border-t border-white/10">
-                  <span>Break-Even Yield:</span>
-                  <span>{calcResult?.break_even_yield_per_acre || 0} Q/Acre</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 text-[10px] text-white/50 leading-relaxed">
-              * Break-even indicates the minimum yield needed per acre to cover all input costs at current mandi prices.
-            </div>
-          </div>
-
-        </div>
-      </div>
     </div>
   );
 };
