@@ -93,10 +93,6 @@ export const SoilReportPage: React.FC = () => {
         {/* Certificate Header Banner */}
         <div className="border-b-2 border-slate-100 pb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-black uppercase tracking-wider">
-              <Award className="w-4 h-4 text-emerald-600" />
-              Government of India SHC Standard Aligned
-            </div>
             <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
               PRECISION SOIL CARD
             </h2>

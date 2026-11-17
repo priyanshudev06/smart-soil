@@ -69,10 +69,6 @@ export const CropPlannerPage: React.FC = () => {
       {/* 1. Header Banner */}
       <div className="relative rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 p-8 sm:p-10 text-white shadow-xl border border-slate-800 overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2 z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-black uppercase tracking-wider">
-            <Sprout className="w-4 h-4 text-emerald-400" />
-            AI Precision Soil-Matching
-          </div>
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
             {language === 'mr' ? 'पीक निवड व नफा अंदाज' : 'Crop Suitability & Profit'}
           </h1>

@@ -109,10 +109,6 @@ export const AssistantPage: React.FC = () => {
       {/* 1. Header Banner */}
       <div className="relative rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 p-8 sm:p-10 text-white shadow-xl border border-slate-800 overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div className="space-y-2 z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-black uppercase tracking-wider">
-            <Sparkles className="w-4 h-4 text-emerald-400" />
-            AI Agronomy Specialist &bull; Voice Enabled
-          </div>
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
             {language === 'mr' ? 'स्मार्ट कृषी सल्लागार' : 'AI Soil Assistant'}
           </h1>
@@ -208,7 +204,7 @@ export const AssistantPage: React.FC = () => {
             onClick={handleToggleVoiceInput}
             className={`p-3.5 rounded-full transition-all ${
               isListening
-                ? 'bg-red-500 text-white animate-ping'
+                ? 'bg-red-500 text-white shadow-md'
                 : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
             }`}
           >

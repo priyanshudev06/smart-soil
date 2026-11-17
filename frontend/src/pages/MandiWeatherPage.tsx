@@ -46,10 +46,6 @@ export const MandiWeatherPage: React.FC = () => {
       {/* 1. Header Banner */}
       <div className="relative rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-cyan-950 p-8 sm:p-10 text-white shadow-xl border border-slate-800 overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2 z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-black uppercase tracking-wider">
-            <CloudSun className="w-4 h-4 text-cyan-400" />
-            Verified Agmarknet & IMD Telemetry
-          </div>
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
             {language === 'mr' ? 'बाजारभाव व ५-दिवसीय हवामान' : 'Mandi Rates & 5-Day Weather'}
           </h1>

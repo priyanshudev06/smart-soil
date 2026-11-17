@@ -52,94 +52,16 @@ export const Soil3DCanvas: React.FC<Soil3DCanvasProps> = ({ className = '', heig
     terrainGeo.computeVertexNormals();
 
     const terrainMat = new THREE.MeshStandardMaterial({
-      color: 0x0f172a,
+      color: 0x10b981,
       wireframe: true,
-      roughness: 0.5,
-      metalness: 0.4,
+      roughness: 0.4,
+      metalness: 0.5,
     });
     const terrain = new THREE.Mesh(terrainGeo, terrainMat);
     terrain.position.set(0, -1, 0);
     scene.add(terrain);
 
-    // 4. Floating 3D Nutrient Crystals
-    const crystalGroup = new THREE.Group();
-
-    // Emerald Icosahedron (pH)
-    const phGeo = new THREE.IcosahedronGeometry(0.75, 0);
-    const phMat = new THREE.MeshStandardMaterial({
-      color: 0x10b981,
-      emissive: 0x059669,
-      emissiveIntensity: 0.6,
-      roughness: 0.1,
-      metalness: 0.8
-    });
-    const phMesh = new THREE.Mesh(phGeo, phMat);
-    phMesh.position.set(-3.2, 1.8, 0);
-    crystalGroup.add(phMesh);
-
-    // Electric Cyan Octahedron (Nitrogen)
-    const nGeo = new THREE.OctahedronGeometry(0.7, 0);
-    const nMat = new THREE.MeshStandardMaterial({
-      color: 0x06b6d4,
-      emissive: 0x0891b2,
-      emissiveIntensity: 0.6,
-      roughness: 0.1,
-      metalness: 0.8
-    });
-    const nMesh = new THREE.Mesh(nGeo, nMat);
-    nMesh.position.set(-1, 2.6, 1);
-    crystalGroup.add(nMesh);
-
-    // Purple Dodecahedron (Phosphorus)
-    const pGeo = new THREE.DodecahedronGeometry(0.65, 0);
-    const pMat = new THREE.MeshStandardMaterial({
-      color: 0x8b5cf6,
-      emissive: 0x7c3aed,
-      emissiveIntensity: 0.6,
-      roughness: 0.2,
-      metalness: 0.7
-    });
-    const pMesh = new THREE.Mesh(pGeo, pMat);
-    pMesh.position.set(1.4, 2.0, -0.6);
-    crystalGroup.add(pMesh);
-
-    // Amber Gold Crystal (Potassium)
-    const kGeo = new THREE.TetrahedronGeometry(0.8, 0);
-    const kMat = new THREE.MeshStandardMaterial({
-      color: 0xf59e0b,
-      emissive: 0xd97706,
-      emissiveIntensity: 0.6,
-      roughness: 0.1,
-      metalness: 0.8
-    });
-    const kMesh = new THREE.Mesh(kGeo, kMat);
-    kMesh.position.set(3.4, 1.4, 0.6);
-    crystalGroup.add(kMesh);
-
-    scene.add(crystalGroup);
-
-    // 5. Ambient Micro-Nutrient Particles
-    const particleCount = 80;
-    const particleGeo = new THREE.BufferGeometry();
-    const particlePositions = new Float32Array(particleCount * 3);
-
-    for (let i = 0; i < particleCount * 3; i += 3) {
-      particlePositions[i] = (Math.random() - 0.5) * 16;
-      particlePositions[i + 1] = Math.random() * 5.5;
-      particlePositions[i + 2] = (Math.random() - 0.5) * 10;
-    }
-    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-
-    const particleMat = new THREE.PointsMaterial({
-      color: 0x10b981,
-      size: 0.08,
-      transparent: true,
-      opacity: 0.7
-    });
-    const particles = new THREE.Points(particleGeo, particleMat);
-    scene.add(particles);
-
-    // 6. Mouse Interaction
+    // 4. Mouse Interaction
     let mouseX = 0;
     let mouseY = 0;
     let targetX = 0;
@@ -152,7 +74,7 @@ export const Soil3DCanvas: React.FC<Soil3DCanvasProps> = ({ className = '', heig
 
     window.addEventListener('mousemove', onMouseMove);
 
-    // 7. Animation Loop
+    // 5. Animation Loop
     let clock = new THREE.Clock();
     let animId: number;
 
@@ -164,25 +86,7 @@ export const Soil3DCanvas: React.FC<Soil3DCanvasProps> = ({ className = '', heig
       targetY += (mouseY - targetY) * 0.05;
 
       terrain.rotation.z = targetX * 0.12;
-      terrain.rotation.x = -Math.PI / 2 + targetY * 0.1;
-
-      phMesh.rotation.x += 0.012;
-      phMesh.rotation.y += 0.018;
-      phMesh.position.y = 1.8 + Math.sin(elapsedTime * 1.6) * 0.25;
-
-      nMesh.rotation.y += 0.02;
-      nMesh.rotation.z += 0.015;
-      nMesh.position.y = 2.6 + Math.cos(elapsedTime * 1.8) * 0.3;
-
-      pMesh.rotation.x += 0.015;
-      pMesh.position.y = 2.0 + Math.sin(elapsedTime * 1.3 + 1) * 0.25;
-
-      kMesh.rotation.y += 0.022;
-      kMesh.rotation.x += 0.015;
-      kMesh.position.y = 1.4 + Math.cos(elapsedTime * 1.5 + 2) * 0.3;
-
-      crystalGroup.rotation.y = elapsedTime * 0.18 + targetX * 0.3;
-      particles.rotation.y = elapsedTime * 0.05;
+      terrain.rotation.x = -Math.PI / 2 + targetY * 0.1 + Math.sin(elapsedTime * 0.5) * 0.04;
 
       renderer.render(scene, camera);
     };
@@ -214,7 +118,7 @@ export const Soil3DCanvas: React.FC<Soil3DCanvasProps> = ({ className = '', heig
   return (
     <div
       ref={mountRef}
-      className={`w-full overflow-hidden relative pointer-events-none ${className}`}
+      className={`w-full overflow-hidden pointer-events-none ${className}`}
       style={{ height }}
     />
   );

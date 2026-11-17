@@ -65,11 +65,6 @@ export const DashboardPage: React.FC = () => {
 
         {/* Content */}
         <div className="relative z-10 max-w-2xl space-y-5">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black uppercase tracking-wider shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-            {deviceConnected ? 'IoT Spectro-Reader Online' : 'Device Ready'}
-          </div>
-
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
             {language === 'mr'
               ? `नमस्कार, ${farmer?.name || 'शेतकरी मित्र'}!`
@@ -138,7 +133,6 @@ export const DashboardPage: React.FC = () => {
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-emerald-600 font-bold">
               <span>View Advice &rarr;</span>
-              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
             </div>
           </Card3D>
 
@@ -162,7 +156,6 @@ export const DashboardPage: React.FC = () => {
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-cyan-600 font-bold">
               <span>View Advice &rarr;</span>
-              <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
             </div>
           </Card3D>
 
@@ -186,7 +179,6 @@ export const DashboardPage: React.FC = () => {
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-purple-600 font-bold">
               <span>View Advice &rarr;</span>
-              <span className="w-2 h-2 rounded-full bg-purple-500"></span>
             </div>
           </Card3D>
 
@@ -210,7 +202,6 @@ export const DashboardPage: React.FC = () => {
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-amber-600 font-bold">
               <span>View Advice &rarr;</span>
-              <span className="w-2 h-2 rounded-full bg-amber-500"></span>
             </div>
           </Card3D>
 

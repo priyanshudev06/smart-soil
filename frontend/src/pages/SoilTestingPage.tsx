@@ -105,10 +105,6 @@ export const SoilTestingPage: React.FC = () => {
       {/* 1. Header Banner */}
       <div className="relative rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 p-8 sm:p-10 text-white shadow-xl border border-slate-800 overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div className="space-y-2 z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-black uppercase tracking-wider">
-            <FlaskConical className="w-4 h-4 text-emerald-400" />
-            Optical Assay Protocol
-          </div>
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
             {language === 'mr' ? 'माती चाचणी प्रक्रिया' : 'Rapid Soil Testing'}
           </h1>
@@ -254,7 +250,6 @@ export const SoilTestingPage: React.FC = () => {
                   <span className="text-xs font-black text-emerald-600 uppercase tracking-widest">Hardware Telemetry</span>
                   <h3 className="text-2xl font-black text-slate-900 mt-1">TCS34725 Spectro-Reader</h3>
                 </div>
-                <div className="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></div>
               </div>
 
               {/* Channel Values */}

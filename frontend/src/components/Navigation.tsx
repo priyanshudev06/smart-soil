@@ -36,9 +36,8 @@ export const Navigation: React.FC = () => {
               🌱
             </div>
             <div>
-              <div className="font-black text-lg leading-tight text-slate-900 tracking-tight flex items-center gap-1.5">
+              <div className="font-black text-lg leading-tight text-slate-900 tracking-tight">
                 <span>Smart Soil</span>
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               </div>
               <div className="text-[11px] font-bold tracking-wider text-emerald-600 uppercase -mt-0.5">
                 IoT Assistant

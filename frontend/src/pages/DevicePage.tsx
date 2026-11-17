@@ -73,10 +73,6 @@ export const DevicePage: React.FC = () => {
       {/* 1. Header Banner */}
       <div className="relative rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 p-8 sm:p-10 text-white shadow-xl border border-slate-800 overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div className="space-y-2 z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-black uppercase tracking-wider">
-            <Radio className="w-4 h-4 text-emerald-400" />
-            Hardware Diagnostics & Bridge
-          </div>
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
             {language === 'mr' ? 'ESP32 माती रिडर डिव्हाइस' : 'ESP32 Spectro-Reader'}
           </h1>
@@ -109,8 +105,7 @@ export const DevicePage: React.FC = () => {
         <Card3D glowColor="emerald" className="p-6 space-y-4">
           <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Hardware Target</span>
           <div className="text-2xl font-black text-slate-900">{device?.device_id || 'soil-reader-001'}</div>
-          <div className="flex items-center gap-2 text-xs font-bold text-emerald-600">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+          <div className="text-xs font-bold text-emerald-600">
             Firmware v{device?.firmware_version || '1.0.0'} Verified
           </div>
           <div className="pt-2 border-t border-slate-100 text-xs text-slate-500 font-medium">
