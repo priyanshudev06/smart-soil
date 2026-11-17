@@ -8,7 +8,6 @@ import {
   CloudSun,
   Bot,
   Cpu,
-  Globe2,
   MapPin,
   Wifi,
   WifiOff
@@ -23,36 +22,36 @@ export const Navigation: React.FC = () => {
     { to: '/', label: language === 'mr' ? 'डॅशबोर्ड' : language === 'hi' ? 'डैशबोर्ड' : 'Dashboard', icon: LayoutDashboard },
     { to: '/test', label: language === 'mr' ? 'माती चाचणी' : language === 'hi' ? 'मृदा जांच' : 'Soil Test', icon: FlaskConical },
     { to: '/report', label: language === 'mr' ? 'अहवाल' : language === 'hi' ? 'रिपोर्ट' : 'Report', icon: FileSpreadsheet },
-    { to: '/crops', label: language === 'mr' ? 'पीक नियोजन' : language === 'hi' ? 'फसल योजना' : 'Crop Planner', icon: Sprout },
+    { to: '/crops', label: language === 'mr' ? 'पीक नियोजन' : language === 'hi' ? 'फसल योजना' : 'Crops', icon: Sprout },
     { to: '/mandi-weather', label: language === 'mr' ? 'बाजार व हवामान' : language === 'hi' ? 'मंडी व मौसम' : 'Markets', icon: CloudSun },
-    { to: '/assistant', label: language === 'mr' ? 'AI सहाय्यक' : language === 'hi' ? 'AI सहायक' : 'Assistant', icon: Bot },
+    { to: '/assistant', label: language === 'mr' ? 'AI सल्लागार' : language === 'hi' ? 'AI सलाहकार' : 'AI Help', icon: Bot },
     { to: '/device', label: language === 'mr' ? 'डिव्हाइस' : language === 'hi' ? 'डिवाइस' : 'Device', icon: Cpu },
   ];
 
   return (
     <>
-      {/* 1. Floating Top App Bar (Inspired by Lumio Design System) */}
-      <header className="sticky top-3 z-50 px-4 max-w-7xl mx-auto w-full">
-        <div className="bg-[#181818]/95 backdrop-blur-xl border border-white/10 text-white rounded-full px-4 py-2.5 shadow-float flex items-center justify-between gap-2">
+      {/* Floating Top App Bar */}
+      <header className="sticky top-4 z-50 px-4 max-w-7xl mx-auto w-full">
+        <div className="bg-[#181818]/95 backdrop-blur-xl border-2 border-white/15 text-white rounded-full px-5 py-3 shadow-float flex items-center justify-between gap-3">
           
           {/* Logo & Brand */}
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-emerald-pulse/20 border border-emerald-pulse/40 flex items-center justify-center shrink-0">
-              <span className="text-emerald-400 font-bold text-sm">🌱</span>
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="w-10 h-10 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center">
+              <span className="text-xl">🌱</span>
             </div>
             <div className="hidden sm:block">
-              <div className="font-semibold text-sm leading-tight text-white tracking-tight">Smart Soil</div>
-              <div className="text-[10px] text-white/60">IoT Soil Health Reader</div>
+              <div className="font-black text-base leading-tight text-white tracking-tight">Smart Soil</div>
+              <div className="text-xs text-emerald-400 font-bold">IoT Assistant</div>
             </div>
           </div>
 
-          {/* Active Plot Selector */}
-          <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full text-xs">
-            <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          {/* Active Plot Selector Pill */}
+          <div className="flex items-center gap-2 bg-white/15 px-4 py-1.5 rounded-full text-sm font-semibold border border-white/10">
+            <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
             <select
               value={selectedPlot?.plot_id || ''}
               onChange={(e) => setSelectedPlotId(e.target.value)}
-              className="bg-transparent text-white font-medium focus:outline-none cursor-pointer max-w-[130px] sm:max-w-[180px] truncate text-xs"
+              className="bg-transparent text-white font-bold focus:outline-none cursor-pointer max-w-[140px] sm:max-w-[200px] truncate text-sm"
             >
               {plots.map(p => (
                 <option key={p.plot_id} value={p.plot_id} className="bg-[#222] text-white">
@@ -63,7 +62,7 @@ export const Navigation: React.FC = () => {
           </div>
 
           {/* Desktop Nav Links */}
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-1.5">
             {navItems.slice(0, 6).map(item => {
               const Icon = item.icon;
               return (
@@ -71,36 +70,31 @@ export const Navigation: React.FC = () => {
                   key={item.to}
                   to={item.to}
                   className={({ isActive }) =>
-                    `px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${
+                    `px-4 py-2 rounded-full text-sm font-bold transition-all duration-200 flex items-center gap-2 ${
                       isActive
-                        ? 'bg-white text-black font-semibold'
+                        ? 'bg-white text-black shadow-md scale-105'
                         : 'text-white/80 hover:text-white hover:bg-white/10'
                     }`
                   }
                 >
-                  <Icon className="w-3.5 h-3.5" />
+                  <Icon className="w-4 h-4" />
                   <span>{item.label}</span>
                 </NavLink>
               );
             })}
           </nav>
 
-          {/* Right Controls: Role, Language Pill, Offline Status */}
+          {/* Right Controls: Language & Persona Switcher */}
           <div className="flex items-center gap-2">
-            {/* Online/Offline indicator */}
-            <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] ${isOffline ? 'bg-amber-500/20 text-amber-300' : 'bg-emerald-500/20 text-emerald-300'}`}>
-              {isOffline ? <WifiOff className="w-3 h-3" /> : <Wifi className="w-3 h-3" />}
-              <span className="hidden md:inline">{isOffline ? 'Offline' : 'Online'}</span>
-            </div>
-
+            
             {/* Language Switcher Pill */}
-            <div className="flex items-center bg-white/10 rounded-full p-0.5 text-xs font-medium">
+            <div className="flex items-center bg-white/15 rounded-full p-1 text-xs font-bold border border-white/10">
               {(['mr', 'hi', 'en'] as Language[]).map((l) => (
                 <button
                   key={l}
                   onClick={() => setLanguage(l)}
-                  className={`px-2 py-0.5 rounded-full transition-all text-[11px] ${
-                    language === l ? 'bg-white text-black font-bold shadow' : 'text-white/70 hover:text-white'
+                  className={`px-3 py-1 rounded-full transition-all text-xs ${
+                    language === l ? 'bg-white text-black font-black shadow' : 'text-white/80 hover:text-white'
                   }`}
                 >
                   {l === 'mr' ? 'मराठी' : l === 'hi' ? 'हिंदी' : 'EN'}
@@ -108,15 +102,15 @@ export const Navigation: React.FC = () => {
               ))}
             </div>
 
-            {/* Role Switcher Pill */}
+            {/* Persona Switcher */}
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as UserRole)}
-              className="bg-white/10 text-white/90 text-[11px] rounded-full px-2 py-1 font-medium focus:outline-none cursor-pointer hidden md:block"
+              className="bg-white/15 text-white text-xs font-bold rounded-full px-3 py-1.5 focus:outline-none cursor-pointer hidden md:block border border-white/10"
               title="Switch Persona / Role"
             >
-              <option value="farmer" className="bg-[#222]">Farmer (शेतकरी)</option>
-              <option value="operator" className="bg-[#222]">Field Operator</option>
+              <option value="farmer" className="bg-[#222]">Farmer</option>
+              <option value="operator" className="bg-[#222]">Operator</option>
               <option value="agronomist" className="bg-[#222]">Agronomist</option>
               <option value="admin" className="bg-[#222]">Admin</option>
             </select>
@@ -125,8 +119,8 @@ export const Navigation: React.FC = () => {
         </div>
       </header>
 
-      {/* 2. Responsive Mobile Bottom Nav */}
-      <nav className="lg:hidden fixed bottom-3 left-3 right-3 z-50 bg-[#181818]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-float px-2 py-2 flex items-center justify-around">
+      {/* Responsive Mobile Bottom Nav */}
+      <nav className="lg:hidden fixed bottom-4 left-4 right-4 z-50 bg-[#181818]/95 backdrop-blur-xl border-2 border-white/15 rounded-3xl shadow-float px-3 py-2.5 flex items-center justify-around">
         {navItems.map(item => {
           const Icon = item.icon;
           return (
@@ -134,15 +128,15 @@ export const Navigation: React.FC = () => {
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all ${
+                `flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition-all ${
                   isActive
-                    ? 'text-white font-bold bg-white/15 scale-105'
+                    ? 'text-white font-black bg-white/20 scale-105'
                     : 'text-white/60 hover:text-white'
                 }`
               }
             >
-              <Icon className="w-4 h-4" />
-              <span className="text-[10px] mt-0.5 leading-tight">{item.label}</span>
+              <Icon className="w-5 h-5" />
+              <span className="text-xs font-bold mt-1 leading-none">{item.label}</span>
             </NavLink>
           );
         })}
