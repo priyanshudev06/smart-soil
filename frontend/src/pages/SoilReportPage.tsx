@@ -11,47 +11,70 @@ import {
   Layers,
   Sparkles,
   ShieldCheck,
-  Award
+  Award,
+  Radio
 } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import { Card3D } from '../components/Card3D';
+import { speakText, stopSpeaking } from '../utils/speech';
 
 export const SoilReportPage: React.FC = () => {
   const { language, farmer, selectedPlot, lastResult } = useApp();
   const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
+  const [audioLang, setAudioLang] = useState<'mr' | 'hi' | 'en'>('mr');
+  const [activeSpeechText, setActiveSpeechText] = useState<string>('');
   const [labRequested, setLabRequested] = useState<boolean>(false);
 
-  const handleToggleAudio = () => {
-    if ('speechSynthesis' in window) {
-      if (isPlayingAudio) {
-        window.speechSynthesis.cancel();
-        setIsPlayingAudio(false);
-      } else {
-        const ph = lastResult?.value_or_class || '6.8';
-        let text = '';
-        if (language === 'mr') {
-          text = `शेतकरी ${farmer?.name || 'मित्र'} यांचा माती अहवाल. तुमच्या शेताचा सामू ${ph} आहे, जो पिकांसाठी अत्यंत योग्य आहे. नत्र मध्यम, स्फुरद मध्यम आणि पालाश भरपूर आहे. सोयाबीन, कांदा आणि हरभरा ही पिके या मातीसाठी सर्वाधिक फायदेशीर ठरतील.`;
-        } else if (language === 'hi') {
-          text = `किसान ${farmer?.name || 'भाई'} का मृदा रिपोर्ट। आपके खेत का pH मान ${ph} है। नाइट्रोजन मध्यम, फास्फोरस मध्यम और पोटाश उच्च है। सोयाबीन और प्याज सर्वोत्तम हैं।`;
-        } else {
-          text = `Soil Report for ${farmer?.name || 'Farmer'}. Plot soil pH is ${ph}, in the optimal neutral range. Nitrogen is Medium, Phosphorus is Medium, and Potassium is High.`;
-        }
-
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = language === 'mr' ? 'mr-IN' : language === 'hi' ? 'hi-IN' : 'en-US';
-        utterance.onend = () => setIsPlayingAudio(false);
-        utterance.onerror = () => setIsPlayingAudio(false);
-        setIsPlayingAudio(true);
-        window.speechSynthesis.speak(utterance);
-      }
+  const getAudioScript = (lang: 'mr' | 'hi' | 'en') => {
+    const ph = lastResult?.value_or_class || '6.8';
+    if (lang === 'mr') {
+      return `नमस्कार शेतकरी मित्र. हा तुमचा अधिकृत माती आरोग्य अहवाल आहे. तुमच्या शेताचा सामू म्हणजेच पी एच ${ph} आहे, जो पिकांसाठी अत्यंत योग्य आणि उदासीन आहे. जमिनीत उपलब्ध नत्र मध्यम, स्फुरद मध्यम, आणि पालाश भरपूर प्रमाणात आहे. या मातीसाठी सोयाबीन, कांदा आणि हरभरा ही पिके सर्वाधिक फायदेशीर ठरतील. रासायनिक खतांचा अतिवापर टाळा आणि सेंद्रिय शेणखताचा वापर करा.`;
+    } else if (lang === 'hi') {
+      return `नमस्ते किसान भाई. यह आपकी आधिकारिक मृदा स्वास्थ्य रिपोर्ट है. आपके खेत का पी एच मान ${ph} है, जो फसलों के लिए अत्यंत उपयुक्त और उदासीन है. मिट्टी में नाइट्रोजन मध्यम, फास्फोरस मध्यम और पोटाश प्रचुर मात्रा में है. इस मिट्टी के लिए सोयाबीन, प्याज और चना सबसे अधिक लाभदायक फसलें होंगी.`;
+    } else {
+      return `Hello Farmer. This is your official Soil Health Report. Your plot soil pH is ${ph}, which is in the optimal neutral range. Available Nitrogen is Medium, Phosphorus is Medium, and Potassium is High. Recommended high-yield crops are Soybean, Onion, and Chickpea.`;
     }
+  };
+
+  const handlePlayVoice = (lang: 'mr' | 'hi' | 'en') => {
+    if (isPlayingAudio && audioLang === lang) {
+      stopSpeaking();
+      setIsPlayingAudio(false);
+      setActiveSpeechText('');
+      return;
+    }
+
+    setAudioLang(lang);
+    const text = getAudioScript(lang);
+    setActiveSpeechText(text);
+
+    speakText(
+      text,
+      lang,
+      () => setIsPlayingAudio(true),
+      () => {
+        setIsPlayingAudio(false);
+        setActiveSpeechText('');
+      },
+      (err) => {
+        console.warn('Speech error:', err);
+        setIsPlayingAudio(false);
+        setActiveSpeechText('');
+      }
+    );
+  };
+
+  const handleStopVoice = () => {
+    stopSpeaking();
+    setIsPlayingAudio(false);
+    setActiveSpeechText('');
   };
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 pb-24 pt-6 px-4 sm:px-8 print:p-0">
       
       {/* 1. Top Controls Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm print:hidden">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm print:hidden">
         <div>
           <span className="text-xs font-mono tracking-widest text-emerald-600 font-black uppercase">
             CERTIFICATE NO. #TS-2026-NOV-8941
@@ -64,18 +87,53 @@ export const SoilReportPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleToggleAudio}
-            className={`px-6 py-3.5 rounded-full text-xs font-black flex items-center gap-2 transition-all ${
-              isPlayingAudio
-                ? 'bg-red-500 text-white animate-pulse'
-                : 'btn-3d-emerald'
-            }`}
-          >
-            {isPlayingAudio ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-            <span>{isPlayingAudio ? 'Stop Voice' : 'Listen Voice (आवाज)'}</span>
-          </button>
+        <div className="flex flex-wrap items-center gap-3">
+          
+          {/* Audio Language Chips & Trigger */}
+          <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-full border border-slate-200">
+            <button
+              onClick={() => handlePlayVoice('mr')}
+              className={`px-4 py-2 rounded-full text-xs font-black transition-all flex items-center gap-1.5 ${
+                isPlayingAudio && audioLang === 'mr'
+                  ? 'bg-red-500 text-white shadow-md'
+                  : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm'
+              }`}
+            >
+              {isPlayingAudio && audioLang === 'mr' ? (
+                <>
+                  <VolumeX className="w-3.5 h-3.5" />
+                  <span>थांबवा (Stop)</span>
+                </>
+              ) : (
+                <>
+                  <Volume2 className="w-3.5 h-3.5" />
+                  <span>मराठीत ऐका</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={() => handlePlayVoice('hi')}
+              className={`px-3 py-2 rounded-full text-xs font-bold transition-all ${
+                isPlayingAudio && audioLang === 'hi'
+                  ? 'bg-red-500 text-white'
+                  : 'text-slate-700 hover:bg-white'
+              }`}
+            >
+              हिंदी
+            </button>
+
+            <button
+              onClick={() => handlePlayVoice('en')}
+              className={`px-3 py-2 rounded-full text-xs font-bold transition-all ${
+                isPlayingAudio && audioLang === 'en'
+                  ? 'bg-red-500 text-white'
+                  : 'text-slate-700 hover:bg-white'
+              }`}
+            >
+              English
+            </button>
+          </div>
 
           <button
             onClick={() => window.print()}
@@ -86,6 +144,31 @@ export const SoilReportPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Live Voice Playback Banner (Active Speech Display) */}
+      {isPlayingAudio && (
+        <div className="bg-emerald-950 text-white p-5 rounded-3xl border border-emerald-800 shadow-xl space-y-2 animate-in fade-in duration-300">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-emerald-400 font-black text-xs uppercase tracking-wider flex items-center gap-2">
+                <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
+                <span>
+                  {audioLang === 'mr' ? 'मराठी आवाज सुरू आहे (Playing in Marathi)' : audioLang === 'hi' ? 'हिंदी ऑडियो चालू है' : 'Playing English Audio'}
+                </span>
+              </span>
+            </div>
+            <button
+              onClick={handleStopVoice}
+              className="text-xs font-bold bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-full transition-colors"
+            >
+              Stop
+            </button>
+          </div>
+          <p className="text-sm text-emerald-100 font-medium leading-relaxed">
+            "{activeSpeechText}"
+          </p>
+        </div>
+      )}
 
       {/* 2. Main Certificate Body */}
       <div className="bg-white border-2 border-slate-200 rounded-3xl p-8 sm:p-12 shadow-xl space-y-8 print:border-none print:shadow-none print:p-2">

@@ -15,6 +15,7 @@ import {
 import { useApp } from '../contexts/AppContext';
 import { api } from '../services/api';
 import { Card3D } from '../components/Card3D';
+import { speakText, stopSpeaking } from '../utils/speech';
 
 interface Message {
   sender: 'user' | 'assistant';
@@ -95,12 +96,7 @@ export const AssistantPage: React.FC = () => {
   };
 
   const handleSpeak = (text: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = language === 'mr' ? 'mr-IN' : language === 'hi' ? 'hi-IN' : 'en-US';
-      window.speechSynthesis.speak(u);
-    }
+    speakText(text, language);
   };
 
   return (
