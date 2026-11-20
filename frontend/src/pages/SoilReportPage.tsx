@@ -179,15 +179,11 @@ export const SoilReportPage: React.FC = () => {
             <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
               PRECISION SOIL CARD
             </h2>
-            <p className="text-xs text-slate-500 font-medium">
-              IoT Ingest: ESP32 Core • Optical Engine: TCS34725 • Calibration: ph-kit-agri-cal-1.0
-            </p>
           </div>
 
           <div className="text-left sm:text-right bg-slate-50 sm:bg-transparent p-4 sm:p-0 rounded-2xl border sm:border-none border-slate-200">
             <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Farmer Record</div>
             <div className="text-xl font-black text-slate-900 mt-1">{farmer?.name}</div>
-            <div className="text-xs font-semibold text-slate-600">Aadhaar Linked • {farmer?.phone}</div>
           </div>
         </div>
 
