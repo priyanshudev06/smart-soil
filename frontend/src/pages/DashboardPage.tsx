@@ -4,18 +4,19 @@ import {
   FlaskConical,
   Sprout,
   ArrowRight,
+  ArrowUpRight,
   TrendingUp,
   CloudSun,
   ShieldCheck,
   Zap,
   CheckCircle2,
   Sparkles,
-  Layers
+  Layers,
+  Globe
 } from 'lucide-react';
 import { useApp } from '../contexts/AppContext';
 import { api } from '../services/api';
 import { SoilSummary, MandiItem, WeatherDay } from '../types';
-import { Soil3DCanvas } from '../components/Soil3DCanvas';
 import { Card3D } from '../components/Card3D';
 import { PopUpModal } from '../components/PopUpModal';
 
@@ -49,55 +50,187 @@ export const DashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 pb-24 pt-6 max-w-7xl mx-auto px-4 sm:px-8">
+    <div className="space-y-10 pb-24 pt-4 max-w-7xl mx-auto px-4 sm:px-8">
       
-      {/* 1. High-Tech 3D Hero Banner */}
-      <div className="relative rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950 p-8 sm:p-12 text-white shadow-2xl border border-slate-800 overflow-hidden">
-        
-        {/* Glowing Ambient Mesh in Background */}
-        <div className="absolute -right-20 -top-20 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute right-40 -bottom-20 w-80 h-80 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none" />
+      {/* 1. Top Announcement Bar (Matching Reference Design) */}
+      <div className="bg-[#D1FAE5] text-emerald-950 text-xs sm:text-sm font-bold py-2.5 px-6 rounded-full text-center shadow-sm flex items-center justify-center gap-2 border border-emerald-200">
+        <Sparkles className="w-4 h-4 text-emerald-700 shrink-0" />
+        <span>KVK Certified Agricultural Season 2026 &bull; Real-time IoT Soil Spectrometry Online &bull; 4-in-1 NPK & pH Diagnostics</span>
+      </div>
 
-        {/* 3D Three.js Visualizer in Top Right */}
-        <div className="absolute right-0 top-0 bottom-0 w-full lg:w-1/2 opacity-70 lg:opacity-100 pointer-events-none">
-          <Soil3DCanvas height="100%" />
+      {/* 2. Hero Section (Exact Match to Reference Layout with Rich Farming Background) */}
+      <div className="relative rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden min-h-[580px] sm:min-h-[640px] flex flex-col justify-between p-6 sm:p-12 text-white shadow-2xl border border-slate-200/40">
+        
+        {/* Background Image: High-Resolution Precision Agriculture Photography from Unsplash */}
+        <div
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-700 scale-105"
+          style={{
+            backgroundImage: `url('https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=2000&q=85')`
+          }}
+        />
+
+        {/* Cinematic Vignette Overlay for Crisp Contrast and Readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/50 to-slate-950/25 pointer-events-none" />
+
+        {/* Top Header Bar Inside Hero */}
+        <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">
+          <div className="backdrop-blur-md bg-white/10 border border-white/20 px-5 py-2 rounded-full text-xs font-bold text-white flex items-center gap-2">
+            <span>🌱</span>
+            <span>Welcome, <strong>{farmer?.name || 'Farmer'}</strong></span>
+            <span className="text-white/60">&bull;</span>
+            <span className="text-emerald-300 font-extrabold">{selectedPlot?.label}</span>
+          </div>
+
+          <div className="backdrop-blur-md bg-black/30 border border-white/15 px-4 py-2 rounded-full text-xs font-semibold text-slate-200 hidden sm:flex items-center gap-2">
+            <span className="text-emerald-400 font-bold">●</span>
+            <span>{deviceConnected ? 'IoT Spectro-Reader Online' : 'Optical Reader Ready'}</span>
+            <span className="text-white/40">&bull;</span>
+            <span>{selectedPlot?.area} Acres ({selectedPlot?.soil_type})</span>
+          </div>
         </div>
 
-        {/* Content */}
-        <div className="relative z-10 max-w-2xl space-y-5">
-          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-            {language === 'mr'
-              ? `नमस्कार, ${farmer?.name || 'शेतकरी मित्र'}!`
-              : language === 'hi'
-              ? `नमस्ते, ${farmer?.name || 'किसान भाई'}!`
-              : `Welcome, ${farmer?.name || 'Farmer'}!`}
-          </h1>
+        {/* Bottom Hero Layout: Left Typography + Right 3 Floating Cards (Matching Reference) */}
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-end pt-12">
+          
+          {/* Left Column: Big Bold Typography & Pill CTAs */}
+          <div className="lg:col-span-7 space-y-6">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tight leading-[1.04]">
+              {language === 'mr'
+                ? 'माती आरोग्य सुधारा, आधुनिक तंत्रज्ञानाने'
+                : language === 'hi'
+                ? 'मृदा स्वास्थ्य सुधारें, आधुनिक तकनीक से'
+                : 'Prevent crop failure the smart way'}
+            </h1>
 
-          <p className="text-base sm:text-lg text-slate-300 font-medium">
-            Field: <strong className="text-white">{selectedPlot?.label}</strong> ({selectedPlot?.area} Acres • {selectedPlot?.soil_type})
-          </p>
+            <p className="text-base sm:text-xl text-slate-200 font-medium max-w-xl leading-relaxed">
+              {language === 'mr'
+                ? 'अचूक ऑप्टिकल सेन्सर आणि कृषी मार्गदर्शनासह, स्मार्ट सॉईल मंद प्रयोगशाळा चाचण्या आणि अंदाजे खत व्यवस्थापन इतिहासजमा करते.'
+                : 'With intelligent optical sensing and real-time agronomic guidance, Smart Soil makes slow laboratory tests and blind fertilizer dosing obsolete.'}
+            </p>
 
-          <div className="pt-2 flex flex-wrap gap-4">
-            <button
-              onClick={() => navigate('/test')}
-              className="btn-3d-emerald px-8 py-4 text-base sm:text-lg flex items-center gap-3"
-            >
-              <FlaskConical className="w-5 h-5" />
-              <span>{language === 'mr' ? 'माती चाचणी सुरू करा' : 'Start Rapid Soil Test'}</span>
-              <ArrowRight className="w-5 h-5 ml-1" />
-            </button>
+            {/* Pill CTA Buttons */}
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <button
+                onClick={() => navigate('/test')}
+                className="bg-white hover:bg-slate-100 text-slate-950 font-black px-8 py-4 rounded-full text-base sm:text-lg transition-all flex items-center gap-3 shadow-2xl hover:scale-105 active:scale-95"
+              >
+                <FlaskConical className="w-5 h-5 text-emerald-600" />
+                <span>{language === 'mr' ? 'माती चाचणी सुरू करा' : 'Start Rapid Soil Test'}</span>
+              </button>
 
-            <button
-              onClick={() => navigate('/report')}
-              className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-6 py-4 rounded-full text-base font-bold transition-all shadow-sm"
-            >
-              {language === 'mr' ? 'अहवाल पहा' : 'View Soil Card'}
-            </button>
+              <button
+                onClick={() => navigate('/test')}
+                className="w-14 h-14 rounded-full bg-white hover:bg-slate-100 text-slate-950 flex items-center justify-center shadow-2xl hover:scale-105 transition-transform"
+                title="Start Instant Scan"
+              >
+                <ArrowUpRight className="w-6 h-6" />
+              </button>
+
+              <button
+                onClick={() => navigate('/report')}
+                className="bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/20 px-6 py-4 rounded-full text-sm sm:text-base font-bold transition-all shadow-sm"
+              >
+                {language === 'mr' ? 'अहवाल पहा' : 'View Soil Card'}
+              </button>
+            </div>
           </div>
+
+          {/* Right Column: 3 Floating White Cards (Matching Reference Layout) */}
+          <div className="lg:col-span-5 space-y-4">
+            
+            {/* Floating Card 1: Main Feature Promo */}
+            <div className="rounded-3xl bg-white/95 backdrop-blur-md p-5 text-slate-900 shadow-2xl border border-white/80 flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <h3 className="text-lg font-black tracking-tight text-slate-900">
+                  Rapid IoT Soil Spectrometry
+                </h3>
+                <p className="text-xs text-slate-600 font-medium leading-snug">
+                  TCS34725 optical sensor with 60s reaction kinetic analysis.
+                </p>
+                <div className="pt-2">
+                  <button
+                    onClick={() => navigate('/test')}
+                    className="bg-slate-900 hover:bg-black text-white text-xs font-bold px-4 py-2 rounded-full inline-flex items-center gap-1.5 transition-colors"
+                  >
+                    <span>Test Sample</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+              <img
+                src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=260&q=80"
+                alt="Soil Test"
+                className="w-24 h-24 rounded-2xl object-cover shrink-0 shadow-md border border-slate-100"
+              />
+            </div>
+
+            {/* Bottom Row of 2 Small Cards */}
+            <div className="grid grid-cols-2 gap-4">
+              
+              {/* Floating Card 2: 24/7 Field Service */}
+              <div className="rounded-3xl bg-white/95 backdrop-blur-md p-5 text-slate-900 shadow-2xl border border-white/80 flex flex-col justify-between space-y-3">
+                <div className="w-full h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-800 text-xs font-black gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>KVK Validated</span>
+                </div>
+                <div>
+                  <div className="text-2xl font-black text-slate-900">24/7</div>
+                  <div className="text-xs text-slate-500 font-semibold mt-0.5">Offline-First Field Service</div>
+                </div>
+              </div>
+
+              {/* Floating Card 3: 120K+ Supported */}
+              <div className="rounded-3xl bg-white/95 backdrop-blur-md p-5 text-slate-900 shadow-2xl border border-white/80 flex flex-col justify-between space-y-3">
+                <div>
+                  <div className="text-2xl font-black text-emerald-600">120K+</div>
+                  <div className="text-xs text-slate-500 font-semibold mt-0.5">Farmers Supported</div>
+                </div>
+                <div className="flex items-center -space-x-2 pt-1">
+                  <img
+                    className="w-8 h-8 rounded-full border-2 border-white object-cover"
+                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80"
+                    alt="farmer"
+                  />
+                  <img
+                    className="w-8 h-8 rounded-full border-2 border-white object-cover"
+                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80"
+                    alt="agronomist"
+                  />
+                  <img
+                    className="w-8 h-8 rounded-full border-2 border-white object-cover"
+                    src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80"
+                    alt="farmer"
+                  />
+                  <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-black text-[10px] flex items-center justify-center border-2 border-white">
+                    +4K
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* 3. Institutional Partners / "As seen in" Banner (Matching Reference Image) */}
+      <div className="py-4 text-center space-y-3">
+        <span className="text-xs font-black uppercase tracking-widest text-slate-400">
+          Institutional agronomy & telemetry partners
+        </span>
+        <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-12 opacity-80 transition-all duration-300">
+          <span className="font-extrabold text-xs sm:text-sm text-slate-600 tracking-wider">🏛️ ICAR-IISS Bhopal</span>
+          <span className="font-extrabold text-xs sm:text-sm text-slate-600 tracking-wider">🌾 MPKV Rahuri</span>
+          <span className="font-extrabold text-xs sm:text-sm text-slate-600 tracking-wider">📊 AGMARKNET</span>
+          <span className="font-extrabold text-xs sm:text-sm text-slate-600 tracking-wider">🌤️ IMD Mausam</span>
+          <span className="font-extrabold text-xs sm:text-sm text-slate-600 tracking-wider">📜 Soil Health Card</span>
+          <span className="font-extrabold text-xs sm:text-sm text-slate-600 tracking-wider">⚡ Digital India Agri</span>
         </div>
       </div>
 
-      {/* 2. 3D Pop-Up Interactive Nutrient Cards (Boxes with Genuine 3D Depth) */}
+      {/* 4. 3D Pop-Up Interactive Nutrient Cards (Boxes with Genuine 3D Depth) */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
@@ -208,11 +341,11 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. Crop Yield & Mandi Grid */}
+      {/* 5. Crop Yield & Mandi Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Recommended Crops Box */}
-        <div className="lg:col-span-2 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-float-lg space-y-4">
+        <div className="lg:col-span-2 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-lg space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Sprout className="w-6 h-6 text-emerald-600" />
@@ -230,92 +363,107 @@ export const DashboardPage: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              { name: 'Soybean (सोयाबीन)', score: '85% Match', profit: '₹28,000 - ₹38,000 /ac', bg: 'hover:border-emerald-500' },
-              { name: 'Onion (कांदा)', score: '80% Match', profit: '₹45,000 - ₹85,000 /ac', bg: 'hover:border-cyan-500' },
-              { name: 'Cotton (कापूस)', score: '78% Match', profit: '₹32,000 - ₹50,000 /ac', bg: 'hover:border-amber-500' }
-            ].map((c, i) => (
-              <div
-                key={i}
-                className={`bg-slate-50 border-2 border-slate-200 rounded-2xl p-5 transition-all hover:-translate-y-1.5 shadow-sm ${c.bg}`}
-              >
-                <div className="text-xs font-black text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full inline-block">
-                  {c.score}
+              { name: 'Soybean (सोयाबीन)', score: 95, yield: '10–12 Qtl/Acre', glow: 'emerald' },
+              { name: 'Onion (कांदा)', score: 90, yield: '120–150 Qtl/Acre', glow: 'blue' },
+              { name: 'Gram (हरभरा)', score: 88, yield: '8–10 Qtl/Acre', glow: 'purple' },
+            ].map((c) => (
+              <Card3D key={c.name} glowColor={c.glow as any} className="p-5" onClick={() => navigate('/crops')}>
+                <div className="text-xs font-black uppercase tracking-wider text-slate-400">Ranked #1 Match</div>
+                <div className="text-lg font-black text-slate-900 mt-1">{c.name}</div>
+                <div className="text-xs text-emerald-700 font-bold mt-1">{c.score}% Soil Match</div>
+                <div className="text-xs text-slate-500 font-medium mt-3 pt-2 border-t border-slate-100">
+                  Est. Yield: {c.yield}
                 </div>
-                <div className="text-lg font-black text-slate-900 mt-2">{c.name}</div>
-                <div className="text-sm font-bold text-emerald-800 mt-2">
-                  Net: {c.profit}
-                </div>
-              </div>
+              </Card3D>
             ))}
           </div>
         </div>
 
-        {/* Live Market Rates Box */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-float-lg space-y-4 flex flex-col justify-between">
+        {/* Live Mandi Rates Box */}
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-lg space-y-4 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-amber-500" />
-                <h3 className="font-black text-lg text-slate-900">Pune Mandi Rates</h3>
+                <TrendingUp className="w-5 h-5 text-emerald-600" />
+                <h3 className="font-black text-lg text-slate-900">
+                  Live Mandi Rates
+                </h3>
               </div>
-              <button onClick={() => navigate('/mandi-weather')} className="text-xs font-bold text-slate-500 hover:text-black">
-                Details &rarr;
+              <button
+                onClick={() => navigate('/mandi-weather')}
+                className="text-xs font-bold text-emerald-700 hover:underline"
+              >
+                View More &rarr;
               </button>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {mandi.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/70">
+                <div
+                  key={idx}
+                  onClick={() => navigate('/mandi-weather')}
+                  className="p-3.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/50 border border-slate-100 hover:border-emerald-200 transition-all cursor-pointer flex items-center justify-between"
+                >
                   <div>
-                    <div className="font-bold text-sm text-slate-900">{item.commodity}</div>
-                    <div className="text-xs text-slate-500">{item.market}</div>
+                    <div className="font-extrabold text-sm text-slate-900">
+                      {language === 'mr' ? item.commodity_mr : language === 'hi' ? item.commodity_hi : item.commodity}
+                    </div>
+                    <div className="text-xs text-slate-400 font-semibold">{item.market}</div>
                   </div>
                   <div className="text-right">
-                    <div className="font-black text-base text-slate-900">₹{item.modal_price}</div>
-                    <div className="text-[11px] text-slate-500 font-semibold">/ Quintal</div>
+                    <div className="text-base font-black text-slate-900">
+                      ₹{item.modal_price.toLocaleString()}
+                    </div>
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">{item.unit}</div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-emerald-500 to-cyan-600 text-white rounded-2xl p-4 flex items-center justify-between shadow-md">
-            <div>
-              <div className="text-xs font-bold text-emerald-100 uppercase">Pune Weather</div>
-              <div className="text-2xl font-black text-white">31°C / 18°C</div>
-              <div className="text-xs text-emerald-100">Clear Sky • Optimal for Field Work</div>
-            </div>
-            <CloudSun className="w-10 h-10 text-white" />
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>Source: AGMARKNET</span>
+            <span className="text-emerald-700 font-bold">Daily Updated</span>
           </div>
         </div>
 
       </div>
 
-      {/* Pop-Up Modal for Quick Nutrient Insights */}
-      {modalMetric && (
-        <PopUpModal
-          isOpen={showQuickModal}
-          onClose={() => setShowQuickModal(false)}
-          title={modalMetric.title}
-          subtitle={`Current Reading: ${modalMetric.val}`}
-        >
-          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-sm font-semibold text-slate-700 leading-relaxed">
-            {modalMetric.desc}
+      {/* PopUp Modal for Nutrient Detail */}
+      <PopUpModal
+        isOpen={showQuickModal}
+        onClose={() => setShowQuickModal(false)}
+        title={modalMetric?.title || 'Nutrient Detail'}
+        subtitle="Scientific Calibration & Guidance"
+      >
+        <div className="space-y-4">
+          <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-center">
+            <span className="text-xs font-black text-emerald-800 uppercase tracking-widest block mb-1">
+              Recorded Test Reading
+            </span>
+            <div className="text-4xl font-black text-emerald-700">
+              {modalMetric?.val}
+            </div>
           </div>
-          <div className="pt-2 flex justify-end">
+
+          <div className="text-sm font-medium text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            {modalMetric?.desc}
+          </div>
+
+          <div className="pt-2">
             <button
               onClick={() => {
                 setShowQuickModal(false);
                 navigate('/report');
               }}
-              className="btn-3d-emerald px-6 py-2.5 text-xs flex items-center gap-2"
+              className="btn-3d-emerald w-full py-4 text-sm font-black flex items-center justify-center gap-2"
             >
-              <span>Open Full Soil Report</span>
+              <span>View Full Soil Health Card</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
-        </PopUpModal>
-      )}
+        </div>
+      </PopUpModal>
 
     </div>
   );
