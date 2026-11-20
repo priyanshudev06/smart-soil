@@ -10,7 +10,6 @@ import {
   ShieldCheck,
   Zap,
   CheckCircle2,
-  Sparkles,
   Layers,
   Globe
 } from 'lucide-react';
@@ -52,13 +51,7 @@ export const DashboardPage: React.FC = () => {
   return (
     <div className="space-y-10 pb-24 pt-4 max-w-7xl mx-auto px-4 sm:px-8">
       
-      {/* 1. Top Announcement Bar (Matching Reference Design) */}
-      <div className="bg-[#D1FAE5] text-emerald-950 text-xs sm:text-sm font-bold py-2.5 px-6 rounded-full text-center shadow-sm flex items-center justify-center gap-2 border border-emerald-200">
-        <Sparkles className="w-4 h-4 text-emerald-700 shrink-0" />
-        <span>KVK Certified Agricultural Season 2026 &bull; Real-time IoT Soil Spectrometry Online &bull; 4-in-1 NPK & pH Diagnostics</span>
-      </div>
-
-      {/* 2. Hero Section (Exact Match to Reference Layout with Rich Farming Background) */}
+      {/* Hero Section (Exact Match to Reference Layout with Rich Farming Background) */}
       <div className="relative rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden min-h-[580px] sm:min-h-[640px] flex flex-col justify-between p-6 sm:p-12 text-white shadow-2xl border border-slate-200/40">
         
         {/* Background Image: High-Resolution Precision Agriculture Photography from Unsplash */}

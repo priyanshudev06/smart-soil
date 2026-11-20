@@ -24,7 +24,14 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('mr');
+  const [language, setLanguageState] = useState<Language>(() => {
+    return (localStorage.getItem('smart_soil_lang') as Language) || 'en';
+  });
+
+  const setLanguage = (lang: Language) => {
+    localStorage.setItem('smart_soil_lang', lang);
+    setLanguageState(lang);
+  };
   const [role, setRole] = useState<UserRole>('farmer');
   const [farmer, setFarmer] = useState<Farmer | null>(null);
   const [plots, setPlots] = useState<FarmPlot[]>([]);
