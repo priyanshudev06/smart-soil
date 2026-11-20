@@ -72,24 +72,7 @@ export const DashboardPage: React.FC = () => {
         {/* Cinematic Vignette Overlay for Crisp Contrast and Readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/50 to-slate-950/25 pointer-events-none" />
 
-        {/* Top Header Bar Inside Hero */}
-        <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">
-          <div className="backdrop-blur-md bg-white/10 border border-white/20 px-5 py-2 rounded-full text-xs font-bold text-white flex items-center gap-2">
-            <span>🌱</span>
-            <span>Welcome, <strong>{farmer?.name || 'Farmer'}</strong></span>
-            <span className="text-white/60">&bull;</span>
-            <span className="text-emerald-300 font-extrabold">{selectedPlot?.label}</span>
-          </div>
-
-          <div className="backdrop-blur-md bg-black/30 border border-white/15 px-4 py-2 rounded-full text-xs font-semibold text-slate-200 hidden sm:flex items-center gap-2">
-            <span className="text-emerald-400 font-bold">●</span>
-            <span>{deviceConnected ? 'IoT Spectro-Reader Online' : 'Optical Reader Ready'}</span>
-            <span className="text-white/40">&bull;</span>
-            <span>{selectedPlot?.area} Acres ({selectedPlot?.soil_type})</span>
-          </div>
-        </div>
-
-        {/* Bottom Hero Layout: Left Typography + Right 3 Floating Cards (Matching Reference) */}
+        {/* Bottom Hero Layout: Left Typography + Right Floating Card */}
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-end pt-12">
           
           {/* Left Column: Big Bold Typography & Pill CTAs */}
@@ -204,19 +187,11 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 4. 3D Pop-Up Interactive Nutrient Cards (Boxes with Genuine 3D Depth) */}
+      {/* 4. Soil Nutrient Health Indices */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <span>Soil Nutrient Health Indices</span>
-            <span className="text-xs bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-bold">
-              3D Interactive Boxes
-            </span>
-          </h2>
-          <span className="text-xs text-slate-500 font-bold hidden sm:inline">
-            Hover over cards for 3D tilt &bull; Click for pop-up
-          </span>
-        </div>
+        <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+          Soil Nutrient Health Indices
+        </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           

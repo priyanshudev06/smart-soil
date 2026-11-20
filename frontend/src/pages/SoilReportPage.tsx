@@ -191,16 +191,11 @@ export const SoilReportPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 3D Nutrient Parameter Display */}
+        {/* Measured Soil Nutrients */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-black text-slate-900 tracking-tight">
-              Measured Soil Nutrients (4 of 12 SHC Parameters)
-            </h3>
-            <span className="text-xs font-bold text-emerald-600">
-              3D Interactive Cards
-            </span>
-          </div>
+          <h3 className="text-xl font-black text-slate-900 tracking-tight">
+            Measured Soil Nutrients (4 of 12 SHC Parameters)
+          </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             

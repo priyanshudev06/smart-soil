@@ -71,17 +71,12 @@ export const MandiWeatherPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. 5-Day Weather Forecast in 3D Cards */}
+      {/* 2. 5-Day Weather Forecast */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <CloudSun className="w-7 h-7 text-cyan-600" />
-            <span>5-Day Agro-Weather Forecast</span>
-          </h2>
-          <span className="text-xs font-bold bg-cyan-100 text-cyan-800 px-3 py-1 rounded-full hidden sm:inline">
-            Click day for spraying advisory
-          </span>
-        </div>
+        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+          <CloudSun className="w-7 h-7 text-cyan-600" />
+          <span>5-Day Agro-Weather Forecast</span>
+        </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {weather.map((w, idx) => (
@@ -123,17 +118,12 @@ export const MandiWeatherPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. Mandi Market Prices in 3D Cards */}
+      {/* 3. Mandi Market Prices */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <TrendingUp className="w-7 h-7 text-emerald-600" />
-            <span>Live APMC Market Rates</span>
-          </h2>
-          <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full hidden sm:inline">
-            Updated today &bull; Agmarknet
-          </span>
-        </div>
+        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+          <TrendingUp className="w-7 h-7 text-emerald-600" />
+          <span>Live APMC Market Rates</span>
+        </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {mandi.map((item, idx) => {

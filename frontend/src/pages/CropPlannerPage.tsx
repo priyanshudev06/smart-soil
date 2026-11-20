@@ -109,16 +109,11 @@ export const CropPlannerPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. 3D Crop Suitability Cards */}
+      {/* 2. Crop Suitability Cards */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <span>Recommended Crops</span>
-            <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full">
-              Hover for 3D Tilt • Click for Details
-            </span>
-          </h2>
-        </div>
+        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          Recommended Crops
+        </h2>
 
         {loading ? (
           <div className="p-12 text-center text-slate-400 font-bold">Analysing soil compatibility...</div>
