@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider } from './contexts/AppContext';
 import { Navigation } from './components/Navigation';
+import { Footer } from './components/Footer';
 import { CustomCursor } from './components/CustomCursor';
 import { DashboardPage } from './pages/DashboardPage';
 import { SoilTestingPage } from './pages/SoilTestingPage';
@@ -32,6 +33,7 @@ export const App: React.FC = () => {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
+          <Footer />
         </div>
       </BrowserRouter>
     </AppProvider>
