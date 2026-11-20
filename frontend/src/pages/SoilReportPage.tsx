@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Printer,
   Volume2,
   VolumeX,
   FlaskConical,
@@ -134,14 +133,6 @@ export const SoilReportPage: React.FC = () => {
               English
             </button>
           </div>
-
-          <button
-            onClick={() => window.print()}
-            className="btn-3d-dark px-6 py-3.5 text-xs font-black flex items-center gap-2"
-          >
-            <Printer className="w-4 h-4" />
-            <span>Print PDF</span>
-          </button>
         </div>
       </div>
 

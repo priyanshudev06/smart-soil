@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import {
   FlaskConical,
   Github,
-  Linkedin,
-  Twitter,
   Mail,
   Heart,
   ExternalLink,
@@ -85,24 +83,6 @@ export const Footer: React.FC = () => {
                 title="Email Team"
               >
                 <Mail className="w-4 h-4" />
-              </a>
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-900 hover:text-white flex items-center justify-center transition-colors"
-                title="Twitter"
-              >
-                <Twitter className="w-4 h-4" />
-              </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-900 hover:text-white flex items-center justify-center transition-colors"
-                title="LinkedIn"
-              >
-                <Linkedin className="w-4 h-4" />
               </a>
             </div>
           </div>
