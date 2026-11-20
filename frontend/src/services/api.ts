@@ -123,12 +123,17 @@ export const api = {
   },
 
   async calculateProfit(params: any) {
-    const res = await fetch(`${API_BASE}/calculators/profit`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(params)
-    });
-    return await res.json();
+    try {
+      const res = await fetch(`${API_BASE}/calculators/profit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params)
+      });
+      if (!res.ok) throw new Error();
+      return await res.json();
+    } catch {
+      return null;
+    }
   },
 
   async getMandiPrices(district: string = 'Pune'): Promise<MandiItem[]> {

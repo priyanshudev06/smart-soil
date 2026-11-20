@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Sprout,
   Calculator,
@@ -30,15 +30,91 @@ export const CropPlannerPage: React.FC = () => {
 
   // Profit Calculator State
   const [calcCrop, setCalcCrop] = useState<string>('Soybean');
-  const [calcArea, setCalcArea] = useState<number>(selectedPlot?.area || 2.5);
-  const [calcYield, setCalcYield] = useState<number>(10);
-  const [calcPrice, setCalcPrice] = useState<number>(4820);
-  const [calcSeed, setCalcSeed] = useState<number>(3200);
-  const [calcFertilizer, setCalcFertilizer] = useState<number>(4500);
-  const [calcLabor, setCalcLabor] = useState<number>(7500);
-  const [calcIrrigation, setCalcIrrigation] = useState<number>(2000);
+  const [calcArea, setCalcArea] = useState<number | string>(selectedPlot?.area || 2.5);
+  const [calcYield, setCalcYield] = useState<number | string>(10);
+  const [calcPrice, setCalcPrice] = useState<number | string>(4820);
+  const [calcSeed, setCalcSeed] = useState<number | string>(3200);
+  const [calcFertilizer, setCalcFertilizer] = useState<number | string>(4500);
+  const [calcLabor, setCalcLabor] = useState<number | string>(7500);
+  const [calcIrrigation, setCalcIrrigation] = useState<number | string>(2000);
 
-  const [calcResult, setCalcResult] = useState<any>(null);
+  // Sync with selected plot area
+  useEffect(() => {
+    if (selectedPlot?.area) {
+      setCalcArea(selectedPlot.area);
+    }
+  }, [selectedPlot]);
+
+  // Handle crop preset changes
+  const handleCropChange = (cropName: string) => {
+    setCalcCrop(cropName);
+    if (cropName === 'Soybean') {
+      setCalcYield(10);
+      setCalcPrice(4820);
+      setCalcSeed(3200);
+      setCalcFertilizer(4500);
+      setCalcLabor(7500);
+      setCalcIrrigation(2000);
+    } else if (cropName === 'Onion') {
+      setCalcYield(120);
+      setCalcPrice(2100);
+      setCalcSeed(6500);
+      setCalcFertilizer(8500);
+      setCalcLabor(14000);
+      setCalcIrrigation(4000);
+    } else if (cropName === 'Chickpea') {
+      setCalcYield(9);
+      setCalcPrice(5250);
+      setCalcSeed(2800);
+      setCalcFertilizer(3800);
+      setCalcLabor(6000);
+      setCalcIrrigation(1500);
+    } else if (cropName === 'Cotton') {
+      setCalcYield(12);
+      setCalcPrice(6850);
+      setCalcSeed(3800);
+      setCalcFertilizer(6500);
+      setCalcLabor(9500);
+      setCalcIrrigation(3000);
+    }
+  };
+
+  // Instant Reactive Calculations (0ms latency, zero lag on any input change)
+  const numArea = useMemo(() => Math.max(0, parseFloat(String(calcArea)) || 0), [calcArea]);
+  const numYield = useMemo(() => Math.max(0, parseFloat(String(calcYield)) || 0), [calcYield]);
+  const numPrice = useMemo(() => Math.max(0, parseFloat(String(calcPrice)) || 0), [calcPrice]);
+  const numSeed = useMemo(() => Math.max(0, parseFloat(String(calcSeed)) || 0), [calcSeed]);
+  const numFertilizer = useMemo(() => Math.max(0, parseFloat(String(calcFertilizer)) || 0), [calcFertilizer]);
+  const numLabor = useMemo(() => Math.max(0, parseFloat(String(calcLabor)) || 0), [calcLabor]);
+  const numIrrigation = useMemo(() => Math.max(0, parseFloat(String(calcIrrigation)) || 0), [calcIrrigation]);
+
+  const totalYield = useMemo(() => {
+    return Number((numArea * numYield).toFixed(2));
+  }, [numArea, numYield]);
+
+  const grossRevenue = useMemo(() => {
+    return Math.round(totalYield * numPrice);
+  }, [totalYield, numPrice]);
+
+  const perAcreCost = useMemo(() => {
+    return numSeed + numFertilizer + numLabor + numIrrigation;
+  }, [numSeed, numFertilizer, numLabor, numIrrigation]);
+
+  const totalInputCost = useMemo(() => {
+    return Math.round(perAcreCost * numArea);
+  }, [perAcreCost, numArea]);
+
+  const netProfit = useMemo(() => {
+    return grossRevenue - totalInputCost;
+  }, [grossRevenue, totalInputCost]);
+
+  const breakEvenPrice = useMemo(() => {
+    return totalYield > 0 ? Math.round(totalInputCost / totalYield) : 0;
+  }, [totalInputCost, totalYield]);
+
+  const roiPct = useMemo(() => {
+    return totalInputCost > 0 ? Number(((netProfit / totalInputCost) * 100).toFixed(1)) : 0;
+  }, [netProfit, totalInputCost]);
 
   useEffect(() => {
     if (selectedPlot) {
@@ -49,19 +125,6 @@ export const CropPlannerPage: React.FC = () => {
       });
     }
   }, [selectedPlot, season, water]);
-
-  useEffect(() => {
-    api.calculateProfit({
-      crop_name: calcCrop,
-      land_area_acres: calcArea,
-      expected_yield_quintal_per_acre: calcYield,
-      mandi_modal_price_per_quintal: calcPrice,
-      seed_cost_per_acre: calcSeed,
-      fertilizer_manure_cost_per_acre: calcFertilizer,
-      labor_machinery_cost_per_acre: calcLabor,
-      irrigation_other_cost_per_acre: calcIrrigation
-    }).then(res => setCalcResult(res));
-  }, [calcCrop, calcArea, calcYield, calcPrice, calcSeed, calcFertilizer, calcLabor, calcIrrigation]);
 
   return (
     <div className="max-w-7xl mx-auto space-y-10 pb-24 pt-6 px-4 sm:px-8">
@@ -193,7 +256,7 @@ export const CropPlannerPage: React.FC = () => {
                 </label>
                 <select
                   value={calcCrop}
-                  onChange={(e) => setCalcCrop(e.target.value)}
+                  onChange={(e) => handleCropChange(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-300 rounded-2xl p-3 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 >
                   <option value="Soybean">Soybean (सोयाबीन)</option>
@@ -211,7 +274,7 @@ export const CropPlannerPage: React.FC = () => {
                   type="number"
                   step="0.5"
                   value={calcArea}
-                  onChange={(e) => setCalcArea(parseFloat(e.target.value) || 1)}
+                  onChange={(e) => setCalcArea(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-300 rounded-2xl p-3 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
@@ -223,7 +286,7 @@ export const CropPlannerPage: React.FC = () => {
                 <input
                   type="number"
                   value={calcYield}
-                  onChange={(e) => setCalcYield(parseFloat(e.target.value) || 0)}
+                  onChange={(e) => setCalcYield(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-300 rounded-2xl p-3 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
@@ -235,7 +298,7 @@ export const CropPlannerPage: React.FC = () => {
                 <input
                   type="number"
                   value={calcPrice}
-                  onChange={(e) => setCalcPrice(parseFloat(e.target.value) || 0)}
+                  onChange={(e) => setCalcPrice(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-300 rounded-2xl p-3 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
@@ -251,7 +314,7 @@ export const CropPlannerPage: React.FC = () => {
                   <input
                     type="number"
                     value={calcSeed}
-                    onChange={(e) => setCalcSeed(parseFloat(e.target.value) || 0)}
+                    onChange={(e) => setCalcSeed(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-bold text-slate-900"
                   />
                 </div>
@@ -260,7 +323,7 @@ export const CropPlannerPage: React.FC = () => {
                   <input
                     type="number"
                     value={calcFertilizer}
-                    onChange={(e) => setCalcFertilizer(parseFloat(e.target.value) || 0)}
+                    onChange={(e) => setCalcFertilizer(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-bold text-slate-900"
                   />
                 </div>
@@ -269,7 +332,7 @@ export const CropPlannerPage: React.FC = () => {
                   <input
                     type="number"
                     value={calcLabor}
-                    onChange={(e) => setCalcLabor(parseFloat(e.target.value) || 0)}
+                    onChange={(e) => setCalcLabor(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-bold text-slate-900"
                   />
                 </div>
@@ -278,7 +341,7 @@ export const CropPlannerPage: React.FC = () => {
                   <input
                     type="number"
                     value={calcIrrigation}
-                    onChange={(e) => setCalcIrrigation(parseFloat(e.target.value) || 0)}
+                    onChange={(e) => setCalcIrrigation(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-bold text-slate-900"
                   />
                 </div>
@@ -288,41 +351,41 @@ export const CropPlannerPage: React.FC = () => {
 
           {/* 3D Profit Projection Display */}
           <div className="lg:col-span-5">
-            <Card3D glowColor="emerald" className="p-8 bg-gradient-to-br from-slate-900 to-slate-950 text-white border-slate-800">
+            <Card3D glowColor={netProfit >= 0 ? 'emerald' : 'purple'} className="p-8 bg-gradient-to-br from-slate-900 to-slate-950 text-white border-slate-800">
               <div className="space-y-6">
                 <div>
                   <span className="text-xs font-black text-emerald-400 uppercase tracking-widest">
                     Projected Financial Output
                   </span>
                   <h3 className="text-xl font-bold text-slate-200 mt-1">
-                    {calcCrop} for {calcArea} Acres
+                    {calcCrop} for {numArea} Acres
                   </h3>
                 </div>
 
                 <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-4">
                   <div className="flex justify-between items-center text-sm text-slate-300">
                     <span>Total Gross Revenue:</span>
-                    <strong className="text-white text-base">₹{calcResult?.total_revenue?.toLocaleString() || '1,20,500'}</strong>
+                    <strong className="text-white text-base">₹{grossRevenue.toLocaleString()}</strong>
                   </div>
                   <div className="flex justify-between items-center text-sm text-slate-300">
                     <span>Total Cultivation Cost:</span>
-                    <strong className="text-red-400 text-base">-₹{calcResult?.total_cost?.toLocaleString() || '43,000'}</strong>
+                    <strong className="text-red-400 text-base">-₹{totalInputCost.toLocaleString()}</strong>
                   </div>
                   <div className="pt-3 border-t border-white/10 flex justify-between items-center text-xs text-slate-400">
                     <span>Break-Even Price:</span>
-                    <strong className="text-emerald-300">₹{calcResult?.break_even_price_per_quintal || '1,720'} / Qtl</strong>
+                    <strong className="text-emerald-300">₹{breakEvenPrice.toLocaleString()} / Qtl</strong>
                   </div>
                 </div>
 
                 <div className="pt-2">
                   <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">
-                    Estimated Net Profit
+                    {netProfit >= 0 ? 'Estimated Net Profit' : 'Estimated Net Loss'}
                   </span>
-                  <div className="text-4xl sm:text-5xl font-black text-emerald-400 tracking-tight mt-1">
-                    ₹{calcResult?.net_profit?.toLocaleString() || '77,500'}
+                  <div className={`text-4xl sm:text-5xl font-black tracking-tight mt-1 ${netProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {netProfit >= 0 ? `₹${netProfit.toLocaleString()}` : `-₹${Math.abs(netProfit).toLocaleString()}`}
                   </div>
-                  <div className="text-xs text-slate-400 font-semibold mt-1">
-                    ROI: +{calcResult?.roi_percentage || '180'}% on invested capital
+                  <div className={`text-xs font-semibold mt-1 ${netProfit >= 0 ? 'text-slate-400' : 'text-rose-300'}`}>
+                    ROI: {roiPct >= 0 ? `+${roiPct}%` : `${roiPct}%`} on invested capital
                   </div>
                 </div>
 
